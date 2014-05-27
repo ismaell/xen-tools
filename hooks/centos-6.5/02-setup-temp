@@ -1,0 +1,44 @@
+#!/bin/sh
+
+prefix=$1
+
+
+#
+#  Source our common functions
+#
+if [ -e /usr/share/xen-tools/common.sh ]; then
+    . /usr/share/xen-tools/common.sh
+else
+    . ./hooks/common.sh
+fi
+
+#
+# Log our start
+#
+logMessage Script $0 starting
+
+
+#
+
+if [ ! -d ${prefix}/var/log ]; then
+    mkdir -p ${prefix}/var/log
+fi
+
+if [ ! -d ${prefix}/var/run ]; then
+    mkdir -p ${prefix}/var/run
+fi
+
+if [ ! -f ${prefix}/var/log/wtemp ]; then
+    touch ${prefix}/var/tmp/wtemp
+fi
+
+if [ ! -f ${prefix}/var/run/utmp ]; then
+    touch ${prefix}/var/run/utmp
+fi
+
+
+
+#
+#  Log our finish
+#
+logMessage Script $0 finished
