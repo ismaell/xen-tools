@@ -2,9 +2,7 @@
 #
 #  This script sets up the pkgs.org repro  for Yum  onCentOS
 # https://github.com/remsnet/xen-tools
-
-
-set -x
+#set -x
 
 prefix=$1
 
