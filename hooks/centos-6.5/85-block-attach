@@ -7,9 +7,8 @@
 # differences between filesystems - some root filesystems will require
 # the installation of new packages, and we have to handle that here.
 #
-# Steve
-# --
-# http://www.steve.org.uk/
+#
+# https://github.com/remsnet/xen-tools
 
 
 prefix=$1
