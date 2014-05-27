@@ -66,12 +66,16 @@ known to work reliably, i.e.:
 
 ### CentOS
 
-(only DomUs tested, pygrub support incomplete on older the 6.0 and older )
+only DomUs tested, pygrub support incomplete on older then 6.0 .
 
 * CentOS 5
 * CentOS 6
-* CentOS 6.5
 
+However, currently only centos 6.5 and up releases are fully tested and known to work reliably with pygrub
+due now kernel 3.x used with dracut.
+
+* CentOS 6.5
+* CentOS 7.0 - work in progress target -> q3 or q4 2014 
 
 
 
