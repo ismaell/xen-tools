@@ -11,22 +11,16 @@ xen-tools 4.4.rcis1 (Forked release  27-Mai-2014)
  - updated rinse 
  - created rpm specs  for all depend rpm based deployments see https://github.com/remsnet/xen-tools-rpmbuild 
 
-Steven kemp Noted April 2014 :
+ Steven kemp Noted April 2014 to us :
  "Thanks for sharing, but you should know that I no longer take
-part in any xen-tools development. Instead the project was
-handed over to folks who had more time and energy to continue
-with it.
-
-Your contribution would be best shared with the mailing list
-here:
-
-http://xen-tools.org/mailman/listinfo/xen-tools-discuss
-
-Apologies for the slow reply; I've been on holiday.
-
-Steve
--- 
-http://www.steve.org.uk/"
+  part in any xen-tools development. Instead the project was
+  handed over to folks who had more time and energy to continue  with it.
+  Your contribution would be best shared with the mailing list here:
+  http://xen-tools.org/mailman/listinfo/xen-tools-discuss
+  Apologies for the slow reply; I've been on holiday.
+  Steve
+  -- 
+  http://www.steve.org.uk/ "
 
 
 xen-tools 4.3.1 (released 30-Jun-2012)
