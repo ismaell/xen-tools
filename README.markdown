@@ -10,8 +10,16 @@ xen-tools
 About
 -----
 
-xen-tools contains a collection of Perl scripts for working with Xen
-guest images under Linux.
+xen-tools is a collection of simple shell , perl, python scripts which allow you to easily 
+create new Xen guest domains upon your NATIVE Xen host server.
+
+xen-tools gives you the abillty fully control what and how "Items" get auto-deployed with the supported install methodes  
+while  working with Xen  guest images under Linux .
+
+xen-tools  Support as well FAI , pupped , sudo and  some more .
+
+xen-tools are higly configurable and simply to addapt to your own needs .
+
 
 Using this software, you can easily create new
 [Xen](http://www.xen.org) guests configured to be accessible over the
