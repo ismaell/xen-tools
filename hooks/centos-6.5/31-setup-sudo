@@ -2,6 +2,7 @@
 #
 #  This role installs sudo with host sudoers file.
 #
+# https://github.com/remsnet/xen-tools
 
 prefix=$1
 
