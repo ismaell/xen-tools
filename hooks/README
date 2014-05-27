@@ -21,5 +21,6 @@ hooks/
   The subdirectories in this hooks/ directory will be installed
  to the directory /usr/share/xen-tools/
 
-Steve
+
+xen-tools.org developer  Team
 --
