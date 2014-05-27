@@ -4,7 +4,7 @@ Primary Authors
   Axel Beckert <abe@deuxchevaux.org>
   Dmitry Nedospasov <dmitry@nedos.net>
   Stéphane Jourdois <sjourdois [at] com.gmail>
-  Steve Kemp <steve [at] uk.org.steve>
+
 
 
 Contributions
@@ -138,4 +138,16 @@ Contributions
    Remsnet LTD support support [at] remsnet.de
    - rewrite hooks for CENTOS 6.5
    
-   
+
+---------------------------------------------------------------------------------------------
+Former Major Autors & coders ( not any more in the Project ) :
+
+  Steve Kemp <steve [at] uk.org.steve>   - Noticed  Marc 2014 to support@remsnet.de 
+     You should know that I no longer take part in any xen-tools development. 
+     Instead the project was handed over to folks who had more time and energy to continue with it.
+      
+      Your contribution would be best shared with the mailing list here:
+
+      http://xen-tools.org/mailman/listinfo/xen-tools-discuss
+
+
