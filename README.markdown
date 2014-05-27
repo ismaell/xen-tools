@@ -93,6 +93,9 @@ Requirements
 To use these tools you'll need the following software:
 
 * [debootstrap](http://packages.debian.org/debootstrap)
+* [fakeroot](http://packages.debian.org/fakeroot)
+* [rpmstrap](https://github.com/blipvert/rpmstrap)
+
 * Perl and the following Perl modules
   * [Config::IniFiles](http://metacpan.org/release/Config-IniFiles)
 	([Debian Package libconfig-inifiles-perl](http://packages.debian.org/libconfig-inifiles-perl))
@@ -109,13 +112,17 @@ To use these tools you'll need the following software:
   * [File::Which](http://metacpan.org/release/File-Which)
 	([Debian Package libfile-which-perl](http://packages.debian.org/libfile-which-perl))
   * and some more modules which are part of the Perl core and hence do not need to be installed separately.
-* Make, if you are not installing through a package manager
+
+* gnu make,and compiler ,  rpmbuild tools  if you are not installing through a package manager.
+
+
 
 You can try to install RPM-based distributions such as CentOS, or
 Fedora Core, but you will need a correctly installed and configured
 [rinse](http://packages.debian.org/rinse) package. 
 This is currently not fully supported on all distros with xen-tools.
 rinse sample configs for centos6.5 added under examples -  this are fully tested .
+Rinse require fakeroot and rpmstrap to work cleanly.
 
 If you wish to create new Xen instances which may be controlled by
 users via a login shell you can have a look at the (currently
@@ -139,9 +146,7 @@ Installation from RPMbuild
  - picup specfile & build  patches  from  https://github.com/remsnet/xen-tools-rpmbuild
    add them to rpmbuild´s SPECS dir  i.e /usr/src/packages/SPECS
 
- - picup xen-tools sources,
-    rpmbuild -ba <spec>
-    rpm -i <rpm>
+ - picup xen-tools sources ,     rpmbuild -ba <spec> ,     rpm -i <rpm>
 
  
 The Scripts
