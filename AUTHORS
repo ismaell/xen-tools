@@ -134,3 +134,8 @@ Contributions
 
   xstasi on Launchpad
    - Proper upstart handling in the chroot
+   
+   Remsnet LTD support support [at] remsnet.de
+   - rewrite hooks for CENTOS 6.5
+   
+   
