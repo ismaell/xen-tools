@@ -66,10 +66,14 @@ known to work reliably, i.e.:
 
 ### CentOS
 
-(only DomUs tested, pygrub support incomplete)
+(only DomUs tested, pygrub support incomplete on older the 6.0 and older )
 
 * CentOS 5
 * CentOS 6
+* CentOS 6.5
+
+
+
 
 Packages
 --------
@@ -105,8 +109,9 @@ To use these tools you'll need the following software:
 
 You can try to install RPM-based distributions such as CentOS, or
 Fedora Core, but you will need a correctly installed and configured
-[rinse](http://packages.debian.org/rinse) package. This is currently
-not fully supported.
+[rinse](http://packages.debian.org/rinse) package. 
+This is currently not fully supported on all distros with xen-tools.
+rinse sample configs for centos6.5 added under examples -  this are fully tested .
 
 If you wish to create new Xen instances which may be controlled by
 users via a login shell you can have a look at the (currently
