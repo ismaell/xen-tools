@@ -2,10 +2,8 @@
 #
 #  This script cleans the yum database on the new system.
 #
-# Steve
-# --
-# http://www.steve.org.uk/
-
+#
+# https://github.com/remsnet/xen-tools
 
 prefix=$1
 
