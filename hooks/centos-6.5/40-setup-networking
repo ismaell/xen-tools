@@ -2,9 +2,8 @@
 #
 #  This script sets up the networking files for the new image.
 #
-# Steve
-# --
-# http://www.steve.org.uk/
+#
+# https://github.com/remsnet/xen-tools
 
 
 prefix=$1
