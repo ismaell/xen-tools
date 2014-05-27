@@ -1,0 +1,78 @@
+#!/bin/sh
+#
+#  This script is responsible for setting up /etc/fstab upon the
+# new instance.
+#
+#  This should be a simple job, but it is complicated by some of the
+# differences between filesystems - some root filesystems will require
+# the installation of new packages, and we have to handle that here.
+#
+# Steve
+# --
+# http://www.steve.org.uk/
+
+
+prefix=$1
+
+#
+#  Source our common functions
+#
+if [ -e /usr/share/xen-tools/common.sh ]; then
+    . /usr/share/xen-tools/common.sh
+else
+    . ./hooks/common.sh
+fi
+
+
+#
+# Log our start
+#
+logMessage Script $0 starting
+
+logMessage Filesystem options are ${options}
+
+#
+# Find the root device.
+#
+#  1.  default to xvda.
+#
+#  2.  If --ide is specified use hda.
+#
+#  3.  If --scsi is specified use sda.
+#
+#  4.  Otherwise use a named $disk_device
+#
+device=xvda
+if [ "${ide}" ]; then
+    device=hda
+elif [ "${scsi}" ]; then
+    device=sda
+else
+    if [ -n "${disk_device}" ]; then
+        device=`basename $disk_device`
+    fi
+fi
+
+logMessage "Root device is /dev/$device"
+
+echo "Root device is /dev/$device"
+
+
+echo partdata is "${partdata}"
+echo partdata2 is "${partdata2}"
+
+
+# create the xm block-attach
+
+mknod /dev/xvda b 202 0
+
+#
+# http://www.novell.com/support/kb/doc.php?id=7000062
+
+
+
+
+#
+#  Log our finish
+#
+logMessage Script $0 finished
