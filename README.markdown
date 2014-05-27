@@ -123,7 +123,7 @@ unmaintained) [xen-shell](http://xen-tools.org/software/xen-shell/)
 project.
 
 
-Installation
+Installation from Source
 ------------
 
 As root or with sudo, execute `make instal`.
@@ -133,6 +133,17 @@ checked out copy of the git repository (i.e. without a source tar
 ball).
 
 
+Installation from RPMbuild
+------------
+
+ - picup specfile & build  patches  from  https://github.com/remsnet/xen-tools-rpmbuild
+   add them to rpmbuild´s SPECS dir  i.e /usr/src/packages/SPECS
+
+ - picup xen-tools sources,
+    rpmbuild -ba <spec>
+    rpm -i <rpm>
+
+ 
 The Scripts
 -----------
 
