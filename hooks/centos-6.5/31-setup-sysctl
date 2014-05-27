@@ -1,7 +1,9 @@
 #!/bin/sh
 #
-#  This role installs sudo with host sudoers file.
+#  This role installs sysctl  file.
+
 #
+# https://github.com/remsnet/xen-tools
 
 prefix=$1
 
