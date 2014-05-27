@@ -1,0 +1,35 @@
+#!/bin/sh
+#
+#  Configure the new image to have udev installed on centos / fedora /redhat
+#
+# remsnet ltd support
+# --
+# https://github.com/remsnet/xen-tools
+#
+
+
+prefix=$1
+
+
+
+#
+#  Source our common functions - this will let us install a Debian package.
+#
+if [ -e /usr/share/xen-tools/common.sh ]; then
+    . /usr/share/xen-tools/common.sh
+else
+    echo "Installation problem"
+fi
+
+
+#
+#  Install udev.
+#
+installRPMPackage ${prefix} udev
+
+#
+#  Update yum lists.
+#
+chroot ${prefix} /usr/bin/yum update
+
+chroot ${prefix} udevadm trigger
