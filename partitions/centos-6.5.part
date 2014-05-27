@@ -1,0 +1,15 @@
+[root]
+size=6G
+type=ext3
+mountpoint=/
+options=sync,errors=remount-ro,noatime,nodiratime
+
+[swap]
+size=4G
+type=swap
+
+[var]
+size=4G
+type=xfs
+mountpoint=/var
+options=nodev,nosuid,noatime,nodiratime
