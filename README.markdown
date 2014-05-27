@@ -117,15 +117,15 @@ To use these tools you'll need the following software:
 
 
 
-You can try to install RPM-based distributions such as CentOS, or
-Fedora Core, but you will need a correctly installed and configured
-[rinse](http://packages.debian.org/rinse) package. 
-This is currently not fully supported on all distros with xen-tools.
-rinse sample configs for centos6.5 added under examples -  this are fully tested .
-Rinse require fakeroot and rpmstrap to work cleanly.
+You can try to install RPM-based distributions such as CentOS, or <br>
+Fedora Core, but you will need a correctly installed and configured <br>
+[rinse](http://packages.debian.org/rinse) package. <br>
+This is currently not fully supported on all distros with xen-tools.<br>
+rinse sample configs for centos6.5 added under examples -  this are fully tested .<br>
+Rinse require fakeroot and rpmstrap to work cleanly. <br>
 
-If you wish to create new Xen instances which may be controlled by
-users via a login shell you can have a look at the (currently
+If you wish to create new Xen instances which may be controlled by <br>
+users via a login shell you can have a look at the (currently <br>
 unmaintained) [xen-shell](http://xen-tools.org/software/xen-shell/)
 project.
 
