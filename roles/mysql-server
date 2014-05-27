@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+#  Configure the new image to be suitable  for Mysql
+#
+
+
+prefix=$1
+
+
+
+#
+#  Source our common functions - this will let us install a Debian package.
+#
+if [ -e /usr/share/xen-tools/common.sh ]; then
+    . /usr/share/xen-tools/common.sh
+else
+    echo "Installation problem"
+fi
+
+
+#
+#  Update yum lists.
+#
+chroot ${prefix} yum -y update
+
+#
+#  Install the packages
+#
+installRPMPackage ${prefix} perl python
+installRPMPackage ${prefix} mysql-server mysql-libs.x86_64 nagios-plugins-mysql.x86_64 mysql-bench
+
