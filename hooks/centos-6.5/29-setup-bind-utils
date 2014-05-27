@@ -1,10 +1,6 @@
 #!/bin/sh
 #
-#  This script sets up the Yum for CentOS4.
-#
-# Steve
-# --
-# http://www.steve.org.uk/
+# https://github.com/remsnet/xen-tools
 
 set -x
 
