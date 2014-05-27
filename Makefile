@@ -4,9 +4,8 @@
 #  The targets are intended to be useful for people who are using
 # the source repository - but it also contains other useful targets.
 #
-# Steve
-# --
-# http://www.steve.org.uk/
+# https://github.com/remsnet/xen-tools
+
 #
 
 #
@@ -14,7 +13,7 @@
 #
 TMP        ?= /tmp
 DIST_PREFIX = ${TMP}
-VERSION     = 4.4
+VERSION     = 4.4.rcis1
 DEBVERSION  = $(shell echo $(VERSION)|sed 's/\(rc\|pre\|beta\|alpha\)/~\1/')
 BASE        = xen-tools
 VCS         = git
