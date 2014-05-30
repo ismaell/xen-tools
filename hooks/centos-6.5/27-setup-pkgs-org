@@ -1,6 +1,10 @@
 #!/bin/sh
 #
 #  This script sets up the pkgs.org repro  for Yum  onCentOS
+# http://www.thegeekstuff.com/2012/06/enable-epel-repository/
+# http://ftp-stud.hs-esslingen.de/pub/epel/6/i386/repoview/epel-release.html
+
+
 # https://github.com/remsnet/xen-tools
 #set -x
 
@@ -50,6 +54,13 @@ mount -o bind /dev ${prefix}/dev
 #
 chroot ${prefix} /usr/bin/yum -y install wget
 
+# epel standard v 6.8
+chroot ${prefix} mkdir -p /var/tmp
+chroot ${prefix} wget http://ftp-stud.hs-esslingen.de/pub/epel/6/i386/epel-release-6-8.noarch.rpm -o  /var/tmp/epel-release-6-8.noarch.rpm
+chroot ${prefix} rpm -U --force /var/tmp/epel-release-6-8.noarch.rpm
+chroot ${prefix} rm -f /var/tmp/epel-release-6-8.noarch.rpm
+
+# epel nux 
 cat >>${prefix}/etc/yum.repos.d/pkg.org-nux-misc.repo << EOF
 [nux-misc]
 name=Nux Misc
