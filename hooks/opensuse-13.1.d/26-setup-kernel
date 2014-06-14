@@ -6,7 +6,6 @@
 
 prefix=$1
 
-#
 #  Source our common functions
 #
 if [ -e /usr/share/xen-tools/common.sh ]; then
@@ -18,12 +17,7 @@ fi
 #
 # Log our start
 #
-
 logMessage Script $0 starting
-
-
-
-
 
 # Make the console work
 sed -i "/Cancelled/ {G;s/$/co:2345:respawn:\/sbin\/mingetty console/;}" ${prefix}/etc/inittab
@@ -57,25 +51,8 @@ done
 
 
 # Install the kernel, grub and perl
-
-
 chroot ${prefix} zypper clean expire-cache
 #
-# kernel 2.6 cleanup - we don not want the default installed 2.6 kernel
-cd ${prefix}/boot
-        for i in `ls *-2.6.*`
-                do
-                chroot ${prefix} rm -f /boot/$i
-        done
-cd
-cd  ${prefix}/lib/modules
-        for i in `ls -d *2.6.*`
-                do
-                chroot ${prefix} rm -rf /lib/modules/$i
-        done
-cd
-
-
 
 #
 # debug avalible kernel pkgs .. outputs to xen logfile
@@ -88,13 +65,13 @@ KERNELVERSION=`ls ${prefix}/boot/vmlinuz-* | xargs | awk -F " " '{ print $1 }' |
 logMessage "Kernel $KERNELVERSION found"
 
 # Create grub's menu.list
-logMessage "Creating /boot/grub/menu.lst"
+logMessage "Creating /boot/grub2/menu.lst"
 
-if [ ! -d ${prefix}/boot/grub ]; then
-        mkdir -p ${prefix}/boot/grub
+if [ ! -d ${prefix}/boot/grub2 ]; then
+        mkdir -p ${prefix}/boot/grub2
 fi
 
-cat > ${prefix}/boot/grub/menu.lst << EOF
+cat > ${prefix}/boot/grub2/menu.lst << EOF
 # WARNING : Don't forget to update this when you upgrade kernel !
 # You can also exclude kernel-xen from updates by putting
 # exclude=kernel-xen in in [main] in zypper.conf
