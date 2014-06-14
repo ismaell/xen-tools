@@ -1,0 +1,231 @@
+--- /usr/bin/xt-install-image.orig      2014-04-28 19:25:49.000000000 +0200
++++ /usr/bin/xt-install-image   2014-06-14 18:13:33.200000000 +0200
+@@ -102,6 +102,7 @@
+ use Getopt::Long;
+ use Pod::Usage;
+ use Xen::Tools::Common;
++use File::Basename;
+
+
+ #
+@@ -474,10 +475,11 @@
+
+ sub checkForCommonFilesInChroot {
+     my ($chroot, $what) = @_;
+-    foreach my $file (qw( /bin/ls /bin/cp ))
+-    {
+-        if ( !-x $chroot.$file )
+-        {
++
++    foreach my $file (qw( /bin/ls /bin/cp)) {
++        # check the $file and the /usr$file
++        # http://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard
++        if (!isFileExecutable($chroot.$file) && !isFileExecutable($chroot. '/usr' . $file)) {
+             print STDERR <<EOT;
+ WARNING ($0): The $what at $chroot doesn\'t seem to be a full system.
+ WARNING ($0): The $what is missing the common file: $file.
+@@ -487,6 +489,55 @@
+ }
+
+
++=begin doc
++
++  Check if file exist then check if file is symlink or binary.
++  If symlink then folow symlink and check if that been executable.
++
++=end doc
++
++=cut
++
++sub isFileExecutable {
++    my ($file) = @_;
++
++    # Missing file
++    return 0 unless -e $file;
++
++    # Is a symlink ?
++    if (-l $file) {
++            # Follow the symlink
++            my $linked_file = undef;
++            eval {
++                $linked_file = readlink($file);
++
++                # add base path
++                my $linked_file_dirname = dirname($linked_file);
++
++                # the symlink in the same directory ?
++                if ($linked_file_dirname eq '.') {
++                    my $file_dirname = dirname($file);
++
++                     $linked_file = $file_dirname . '/' . $linked_file;
++                }
++            };
++
++            # Could not retrive the linked file or it's not executable
++            if ($@ || !$linked_file || !-x $linked_file) {
++                return 0;
++            }
++            else {
++                return 1;
++            }
++    }
++    else {
++        # File exists, not symlink and executable
++        return 1 if (-x $file);
++    }
++
++    return 0;
++}
++
+
+ =begin doc
+
+[root@ex40 apache2]# diff -ur /usr/bin/xt-install-image.orig /usr/bin/xt-install-image^C
+[root@ex40 apache2]# diff -ur /usr/^C
+[root@ex40 apache2]# type rinse
+rinse is /usr/sbin/rinse
+[root@ex40 apache2]# diff -ur /usr/sbin/rinse-orig /usr/sbin/rinse
+--- /usr/sbin/rinse-orig        2014-04-28 01:21:51.000000000 +0200
++++ /usr/sbin/rinse     2014-06-14 14:45:34.228000000 +0200
+@@ -33,6 +33,9 @@
+    --post-install        Run the given post-install script instead of the
+                          default files in /usr/lib/rinse/$distro
+
++  --prestage             Run the given pre-install script instead of the
++                        default files in /usr/lib/rinse/prestage/$distro
++
+   Misc Options:
+
+    --cache               Should we use a local cache?  (Default is 1)
+@@ -235,7 +238,6 @@
+ #
+ parseCommandLineArguments();
+
+-
+ #
+ #  Handle special case first.
+ #
+@@ -263,7 +265,6 @@
+ #
+ testRootUser() unless ( $CONFIG{ 'print-uris' } );
+
+-
+ #
+ #  Make sure the directory we're installing into exists.
+ #
+@@ -306,6 +307,10 @@
+ #
+ exit if ( $CONFIG{ 'print-uris' } );
+
++#
++# Run the prestage $distribution installation customisation.
++#
++preInstallationCustomization( $CONFIG{ 'distribution' }, $CONFIG{ 'prestage' } );
+
+ #
+ #  Unpack the packages
+@@ -421,6 +426,7 @@
+         "list-distributions",    \$CONFIG{ 'list-distributions' },
+         "print-uris",            \$CONFIG{ 'print-uris' },
+         "post-install=s",        \$CONFIG{ 'post-install' },
++        "prestage=s",            \$CONFIG{ 'prestage' },
+         "before-post-install=s", \$CONFIG{ 'before-post-install' },
+         "after-post-install=s",  \$CONFIG{ 'after-post-install' },
+         "add-pkg-list=s",        \$CONFIG{ 'add-pkg-list' },
+@@ -1101,6 +1107,96 @@
+
+ =cut
+
++sub preInstallationCustomization {
++    my ( $distribution, $prestage ) = @_;
++
++    # skip for Opensuse
++    if ($distribution =~ /opensuse/i) {
++        print "Distribution is $distribution, CHROOT prepare may incomplete\n";
++    }
++
++    #  Setup environment for the post-install scripts.
++    #
++    $ENV{ 'ARCH' }      = $CONFIG{ 'arch' };
++    $ENV{ 'mirror' }    = $CONFIG{ 'mirror' };
++    $ENV{ 'dist' }      = $CONFIG{ 'distribution' };
++    $ENV{ 'directory' } = $CONFIG{ 'directory' };
++    $ENV{ 'cache_dir' } = $CONFIG{ 'cache-dir' };
++    $ENV{ 'prestage' }  = $CONFIG{ 'prestage' };
++
++    my $prefix = $CONFIG{ 'directory' };
++
++    #  Default directory
++    #
++    my $script_dir = "/usr/lib/rinse/prestage";
++
++    #  Overrided by --prestage
++    #
++    if ($prestage) {
++        $script_dir = $prestage;
++
++        $CONFIG{ 'verbose' } && print "Changed directory to $script_dir\n";
++    }
++
++    $CONFIG{ 'verbose' } && print "Directory is $script_dir\n";
++
++    #  Des the directory exists?
++    #
++    unless (-e $script_dir) {
++        $CONFIG{ 'verbose' } && print "$script_dir doesn't exists, CHROOT prepare may incomplete \n";
++    }
++
++    #  It is really a directory?
++    #
++    unless (-d $script_dir) {
++        $CONFIG{ 'verbose' } && print "$script_dir is not a directory, CHROOT prepare may incomplete \n";
++
++    }
++
++    #  Normalize this path, remove the trailing /
++    #
++    $script_dir =~ s/\/*$//;
++
++    #  OK we run the per-distro file(s), along with any common files.
++    #
++    my @scripts = ();
++    push @scripts, sprintf("%s/%s.sh",  $script_dir, lc $distribution);
++
++    foreach my $script ( @scripts )
++    {
++        $CONFIG{'verbose'} && print "Run script: $script $prefix\n";
++
++        # you need /usr/lib/rinse/prestage/<distribution>.sh to exists
++        unless (-e $script) {
++            $CONFIG{ 'verbose' } && print "$script doesn't exists, CHROOT prepare may incomplete\n";
++        }
++
++        # you need /usr/lib/rinse/prestage/<distribution>.sh to be executable
++        unless (-x $script) {
++            $CONFIG{ 'verbose' } && print "$script cannot be executed, CHROOT prepare may incomplete\n";
++        }
++
++        $CONFIG{ 'verbose' } && print "Running prestage $distribution install script $script $prefix:\n";
++
++        my $return_code = system($script, $prefix);
++
++        $CONFIG{ 'verbose' } && print "$script returned [$return_code]\n";
++    }
++}
++
++
++=begin doc
++
++ prestage install  of RPM files from /usr/lib/rinse/prestage/$distribution script
++ Distributions like OpenSuSE require since 12.3 extra stage bevor the main rpm deployment run with unpackPackages,
++ in order to get an valid OS deployment
++
++
++=end doc
++
++=cut
++
++
+ sub unpackPackages
+ {
+     my ($dir) = (@_);
