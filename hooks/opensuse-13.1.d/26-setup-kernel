@@ -99,7 +99,7 @@ mount -o bind /sys ${prefix}/sys
 mount -o bind /dev ${prefix}/dev
 
 chroot ${prefix} grub2-mkconfig -o /boot/grub2/grub.cfg
-chroot ${prefix} dracut -f  --add-drivers xenblk xennet xen_blkfront xenfs xen-netfront
+chroot ${prefix} dracut -f  --add-drivers "xenblk xennet xen_blkfront xenfs xen-netfront xfs lvm2"
 
 umount -f  ${prefix}/proc
 umount -f  ${prefix}/sys
