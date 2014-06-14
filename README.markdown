@@ -85,6 +85,9 @@ due now kernel 3.x used with dracut.
 * CentOS 6.5
 * CentOS 7.0 - work in progress target -> q3 or q4 2014 
 
+### OpenSuSE / SuSE / SLES
+
+* OSS 13.1
 
 
 Packages
