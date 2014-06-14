@@ -1,0 +1,208 @@
+--- /usr/bin/xen-create-image.orig      2014-06-14 21:34:05.544000000 +0200
++++ /usr/bin/xen-create-image   2014-06-14 18:14:14.171000000 +0200
+@@ -151,6 +151,9 @@
+                 used the system will not have a swap entry added to
+                 its /etc/fstab file either.
+
++   --no-xen-ok  Don't complain if xen seems not installed or xend is
++                not running. (Needed for the testsuite.)
++
+    --output=dir Specify the output directory to create the xen
+                 configuration file within.
+
+@@ -1060,11 +1063,13 @@
+
+     #
+     #  Did that work?
+-    #
+-    if ( !-x $MOUNT_POINT . "/bin/ls" )
+-    {
++    # Check /bin/ls and /usr/bin/ls
++    # http://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard
++    if (!isFileExecutable($MOUNT_POINT . "/bin/ls") && !isFileExecutable($MOUNT_POINT . "/usr/bin/ls")) {
+         logprint("System installation failed: /bin/ls missing.  Aborting.\n");
++
+         $CONFIG{'FAIL'} = 1;
++
+         exit 127;
+     }
+
+@@ -1078,6 +1083,55 @@
+ }
+
+
++=begin doc
++
++  Check if file exist then check if file is symlink or binary.
++  If symlink then folow symlink and check if that been executable.
++
++=end doc
++
++=cut
++
++sub isFileExecutable {
++    my ($file) = @_;
++
++    # Missing file
++    return 0 unless -e $file;
++
++    # Is a symlink ?
++    if (-l $file) {
++            # Follow the symlink
++            my $linked_file = undef;
++            eval {
++                $linked_file = readlink($file);
++
++                # add base path
++                my $linked_file_dirname = dirname($linked_file);
++
++                # the symlink in the same directory ?
++                if ($linked_file_dirname eq '.') {
++                    my $file_dirname = dirname($file);
++
++                     $linked_file = $file_dirname . '/' . $linked_file;
++                }
++            };
++
++            # Could not retrive the linked file or it's not executable
++            if ($@ || !$linked_file || !-x $linked_file) {
++                return 0;
++            }
++            else {
++                return 1;
++            }
++    }
++    else {
++        # File exists, not symlink and executable
++        return 1 if (-x $file);
++    }
++
++    return 0;
++}
++
+
+ #
+ #  Run any specified role scripts.
+@@ -1193,6 +1247,95 @@
+             exit 127;
+         }
+     }
++
++
++    #
++    #  Test the system has a valid (network-script) + (vif-script) setup.
++    #
++    testXenConfig();
++
++}
++
++
++
++=begin doc
++
++  Test that the current Xen host has a valid network configuration,
++ this is designed to help newcomers to Xen.
++
++=end doc
++
++=cut
++
++sub testXenConfig
++{
++
++    # wierdness.
++    return if ( !-d "/etc/xen" );
++
++    #
++    #  Temporary hash.
++    #
++    my %cfg;
++
++    #
++    # Read the configuration file.
++    #
++    open( CONFIG, "<", "/etc/xen/xend-config.sxp" ) or
++      fail("Failed to read /etc/xen/xend-config.sxp: $!");
++    while (<CONFIG>)
++    {
++        next if ( !$_ || !length($_) );
++
++        # vif
++        if ( $_ =~ /^\(vif-script ([^)]+)/ )
++        {
++            $cfg{ 'vif-script' } = $1;
++        }
++
++        # network
++        if ( $_ =~ /^\(network-script ([^)]+)/ )
++        {
++            $cfg{ 'network-script' } = $1;
++        }
++    }
++    close(CONFIG);
++
++    if ( !defined( $cfg{ 'network-script' } ) ||
++         !defined( $cfg{ 'vif-script' } ) )
++    {
++        print <<EOF;
++
++WARNING
++-------
++
++  You appear to have a missing vif-script, or network-script, in the
++ Xen configuration file /etc/xen/xend-config.sxp.
++
++  Please fix this and restart Xend, or your guests will not be able
++ to use any networking!
++
++EOF
++    }
++    else
++    {
++        if ( ( $cfg{ 'network-script' } =~ /dummy/i ) ||
++             ( $cfg{ 'vif-script' } =~ /dummy/i ) )
++        {
++
++            print <<EOF;
++WARNING
++-------
++
++  You appear to have a "dummy" vif-script, or network-script, setting
++ in the Xen configuration file /etc/xen/xend-config.sxp.
++
++  Please fix this and restart Xend, or your guests will not be able to
++ use any networking!
++
++EOF
++        }
++    }
+ }
+
+
+@@ -1264,6 +1407,7 @@
+     chomp($CONFIG{ 'arch' });
+     $CONFIG{ 'fs' }            = 'ext3';
+     $CONFIG{ 'force' }         = 0;
++    $CONFIG{ 'no_xen_ok' }     = 0;
+     $CONFIG{ 'install' }       = 1;
+     $CONFIG{ 'hooks' }         = 1;
+     $CONFIG{ 'partitions' }    = '';
+@@ -1596,7 +1740,7 @@
+             "finalrole=s",       \&checkOption,
+             "roledir=s",    \&checkOption,
+             "force!",       \$CONFIG{ 'force' },
+-            "no-xen-ok",    sub { warn "Option --no-xen-ok is deprecated and ignored."; },
++            "no-xen-ok",    \$CONFIG{ 'no_xen_ok' },
+             "keep!",        \$CONFIG{ 'keep' },
+             "template=s",   \&checkOption,
+             "output=s",     \&checkOption,
+@@ -2992,7 +3136,8 @@
+             # Delete if forcing
+             if ( $CONFIG{ 'force' } )
+             {
+-                unless ( xenRunning($CONFIG{ 'hostname' }, \%CONFIG)) {
++                if ( $CONFIG{ 'no_xen_ok' } or
++                     !xenRunning($CONFIG{ 'hostname' }, \%CONFIG)) {
+                     logprint(
+                         "Removing $lvm_disk - since we're forcing the install\n");
+                     runCommand("lvremove --force $lvm_disk", \%CONFIG);
