@@ -1,7 +1,13 @@
+xen-tools 4.4.rcis2-dev01 (Forked release  14-June-2014)
+- added experimental opensuse 13.1 hooek support.
+- added prestage funtion for distros like opensuse to setup cleanly chroot - without  that  , the OSS autodeplyment failed .
+- patched hardcoded /bin/ls /bin/cp with more sufficent : check /usr/bin and fllow and check symlikns
+  This are required due LSB standard 2.3 / 3.0dev
+- xen-tools & rinse Perl patches & fixes by Adrian Arnautu /Romania, Bucharest   arnautu dot adrian at gmail dot com
 
 xen-tools 4.4.rcis1 (Forked release  27-Mai-2014)
 ======================================
- - Steave left, handed over to xen-tools.org Folks.
+ - Steve left, handed over to xen-tools.org Folks .
  - New xen-tools Maintainer : Alex Beckert.
  - xen-tools forked from xen-tools org in April 2014 for Remsnet LTD support patches 
  - centos 6.5 support added
