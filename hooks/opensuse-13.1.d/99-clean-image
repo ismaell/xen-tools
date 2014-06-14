@@ -1,0 +1,47 @@
+#!/bin/sh
+#
+#  This script cleans the zypper database on the new system.
+#
+# https://github.com/remsnet/xen-tools
+
+prefix=$1
+
+#
+#  Source our common functions
+#
+if [ -e /usr/share/xen-tools/common.sh ]; then
+    . /usr/share/xen-tools/common.sh
+else
+    . ./hooks/common.sh
+fi
+
+
+#
+# Log our start
+#
+logMessage Script $0 starting
+
+
+#
+# Clean up RPM files.
+#
+logMessage Cleaning .rpm* files.
+find ${prefix}/ -name '*.rpmorig' -exec rm -f \{\} \;
+find ${prefix}/ -name '*.rpmnew' -exec rm -f \{\} \;
+
+#
+#  Clean zypper
+#
+logMessage Cleaning Yum Repository
+
+if [ ! -d ${prefix}/proc ]; then
+    mkdir -p ${prefix}/proc
+fi
+mount -o bind /proc ${prefix}/proc
+chroot ${prefix} /usr/bin/zypper clean all
+umount ${prefix}/proc
+
+#
+#  Log our finish
+#
+logMessage Script $0 finished
