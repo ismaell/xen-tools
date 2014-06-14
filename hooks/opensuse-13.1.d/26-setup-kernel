@@ -24,6 +24,7 @@ sed -i "/Cancelled/ {G;s/$/co:2345:respawn:\/sbin\/mingetty console/;}" ${prefix
 sed -i "s/^1:2345/#1:2345/" ${prefix}/etc/inittab
 
 # MAKEDEV is needed at this point
+chroot ${prefix} zypper --non-interactive install makedev
 chroot ${prefix} ln -s /sbin/MAKEDEV /dev/MAKEDEV
 chroot ${prefix} /sbin/MAKEDEV sda sdb sdc sdd
 
