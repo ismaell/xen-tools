@@ -1,0 +1,97 @@
+# /etc/fstab: static file system information.
+#
+# <file system> <mount point>   <type>  <options>       <dump>  <pass>
+#
+proc            /proc           proc    defaults        0       0
+none            /dev/pts        devpts  mode=0620       0       0
+#
+EOF
+
+for i in `seq 1 $NUMPARTITIONS`; do
+  echo -n "/dev/sda$i " >> ${prefix}/etc/fstab
+  eval part=\$PARTITION$i
+  if [ -n "`echo $part | grep swap`" ]; then
+     echo "none swap ws 0 0" >> ${prefix}/etc/fstab
+  else
+     echo $part | awk -F: '{print $4,$3,$5,0,1}' >> ${prefix}/etc/fstab
+  fi
+done
+
+
+# Install the kernel, grub and perl
+
+set -x
+
+chroot ${prefix} zypper clean expire-cache
+#
+# kernel 2.6 cleanup - we don not want the default installed 2.6 kernel
+cd ${prefix}/boot
+        for i in `ls *-2.6.*`
+                do
+                chroot ${prefix} rm -f /boot/$i
+        done
+cd
+cd  ${prefix}/lib/modules
+        for i in `ls -d *2.6.*`
+                do
+                chroot ${prefix} rm -rf /lib/modules/$i
+        done
+cd
+
+#
+# debug avalible kernel pkgs .. outputs to xen logfile
+#
+chroot ${prefix} zypper --non-interactive install perl-Bootloader perl-XML-Parser
+chroot ${prefix} zypper --non-interactive install kernel-xen  grub2 kernel-firmware dracut-tools kmod-compat mkinitrd
+chroot ${prefix} zypper --non-interactive update
+
+KERNELVERSION=`ls ${prefix}/boot/vmlinuz-* | sed "s#$prefix/boot/vmlinuz-##"`
+logMessage "Kernel $KERNELVERSION found"
+
+# Create grub's menu.list
+logMessage "Creating /boot/grub/menu.lst"
+
+if [ ! -d ${prefix}/boot/grub ]; then
+        mkdir -p ${prefix}/boot/grub
+fi
+
+cat > ${prefix}/boot/grub/menu.lst << EOF
+# WARNING : Don't forget to update this when you upgrade kernel !
+# You can also exclude kernel-xen from updates by putting
+# exclude=kernel-xen in in [main] in zypper.conf
+
+default=0
+timeout=5
+title OpenSuSE  x86_64 13.1 ($KERNELVERSION) Paravirtual Guest
+kernel        /boot/vmlinuz-$KERNELVERSION elevator=noop console=tty0 console=hvc0 noresume selinux=0
+initrd        /boot/initramfs-$KERNELVERSION.img
+EOF
+
+# Some use lvm but mkinitrd will generate a wrong initrd when these are present.
+rm -f ${prefix}/etc/lvm/backup/* ${prefix}/etc/lvm/archive/*
+
+if [ ! -d ${prefix}/etc/initramfs-tools/conf.d/ ]; then
+mkdir -p ${prefix}/etc/initramfs-tools/conf.d/
+fi
+
+if [ ! -f ${prefix}/etc/initramfs-tools/conf.d/xen-moules ]; then
+echo "MODULES=xenblk xennet xen_blkfront xenfs xen-netfront" >$prefix/etc/initramfs-tools/conf.d/xen-moules
+fi
+
+mount -o bind /proc ${prefix}/proc
+mount -o bind /sys ${prefix}/sys
+mount -o bind /dev ${prefix}/dev
+
+chroot ${prefix} grub2-mkconfig -o /boot/grub2/grub.cfg
+chroot ${prefix} dracut -f  --add-drivers xenblk xennet xen_blkfront xenfs xen-netfront
+
+umount -f  ${prefix}/proc
+umount -f  ${prefix}/sys
+umount -f  ${prefix}/dev
+
+
+
+#
+#  Log our finish
+#
+logMessage Script $0 finished
