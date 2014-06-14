@@ -45,7 +45,7 @@ chroot ${prefix} zypper --non-interactive install perl-Bootloader perl-XML-Parse
 chroot ${prefix} zypper --non-interactive install kernel-xen  grub2 kernel-firmware dracut-tools kmod-compat mkinitrd
 chroot ${prefix} zypper --non-interactive update
 
-KERNELVERSION=`ls ${prefix}/boot/vmlinuz-* | sed "s#$prefix/boot/vmlinuz-##"`
+KERNELVERSION=`ls ${prefix}/boot/vmlinuz-* | xargs | awk -F " " '{ print $1 }' |sed "s#$prefix/boot/vmlinuz-##"`
 logMessage "Kernel $KERNELVERSION found"
 
 # Create grub's menu.list
