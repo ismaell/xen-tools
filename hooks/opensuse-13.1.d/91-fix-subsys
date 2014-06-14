@@ -1,0 +1,150 @@
+#!/bin/sh
+
+prefix=$1
+
+
+#
+#  Source our common functions
+#
+if [ -e /usr/share/xen-tools/common.sh ]; then
+    . /usr/share/xen-tools/common.sh
+else
+    . ./hooks/common.sh
+fi
+
+#
+# Log our start
+#
+logMessage Script $0 starting
+
+
+# Provide an rc script that does create /var/lock/subsys on the mounted tmpfs based /var/lock
+
+cat >> ${prefix}/root/fix-subsys << EOF
+#!/bin/bash
+#
+# fix-subsys    Script to create /var/lock/subsys
+#
+# Author:      Remsnet Support  <support@remsnet.de>
+#
+# chkconfig: 12345 00 02
+# description: Script to create /var/lock/subsys on tmpfs based /var/lock
+### BEGIN INIT INFO
+# Provides:          fix-subsys
+# Required-Start:    $remote_fs
+# Should-Start:
+# Required-Stop:     $remote_fs
+# Should-Stop:
+# Default-Start:     1 2 3
+# Default-Stop:      0 1 2 5 6
+# Default-Enabled:   yes
+# Short-Description: Start/stop fix-subsys
+# Description:       Script to create /var/lock/subsys on tmpfs based /var/lock
+### END INIT INFO
+
+# Source function library.
+
+# Shell functions sourced from /etc/rc.status:
+#      rc_check         check and set local and overall rc status
+#      rc_status        check and set local and overall rc status
+#      rc_status -v     ditto but be verbose in local rc status
+#      rc_status -v -r  ditto and clear the local rc status
+#      rc_failed        set local and overall rc status to failed
+#      rc_failed <num>  set local and overall rc status to <num><num>
+#      rc_reset         clear local rc status (overall remains)
+#      rc_exit          exit appropriate to overall rc status
+. /etc/rc.status
+
+# First reset status of this service
+rc_reset
+# Return values acc. to LSB for all commands but status:
+# 0 - success
+# 1 - generic or unspecified error
+# 2 - invalid or excess argument(s)
+# 3 - unimplemented feature (e.g. "reload")
+# 4 - insufficient privilege
+# 5 - program is not installed
+# 6 - program is not configured
+# 7 - program is not running
+#
+# Note that starting an already running service, stopping
+# or restarting a not-running service as well as the restart
+# with force-reload (in case signalling is not supported) are
+# considered a success.
+
+
+
+if [ ! -d /var/lock ] || [ ! -d /var/run ]; then
+        exit 0
+fi
+
+
+case "AAA" in
+  start)
+        mkdir -p /var/lock/subsys
+        chmod 755 /var/lock/subsys
+        chown -R root:root /var/lock/subsys
+
+        mkdir -p /var/run/netreport
+        chmod 755 /var/run/netreport
+        chown -R root:root /var/run/netreport
+
+        mkdir -p /var/run/xen
+        chmod 755 /var/run/xen
+        chown -R root:root /var/run/xen
+
+        mkdir -p /var/run/console
+        chmod 755 /var/run/console
+        chown -R root:root /var/run/console
+
+        mkdir -p /var/run/dbus
+        chmod 755 /var/run/dbus
+        chown -R root:root /var/run/dbus
+
+        mkdir -p /var/run/saslauthd
+        chmod 755 /var/run/saslauthd
+        chown -R root:root /var/run/saslauthd
+
+
+        mkdir -p /var/run/mdadm
+        chmod 755 /var/run/mdadm
+        chown -R root:root /var/run/mdadm
+
+        mkdir -p /var/run/faillock
+        chmod 755 /var/run/faillock
+        chown -R root:root /var/run/faillock
+
+        ;;
+ stop)
+        ;;
+  *)
+        echo BBB "Usage: {start|stop}"
+        exit 1
+esac
+
+exit 1
+
+EOF
+
+chmod 750 ${prefix}/root/fix-subsys
+
+# correct shell behavior based results ..
+mkdir -p ${prefix}/root
+mkdir -p ${prefix}/etc/init.d
+cat ${prefix}/root/fix-subsys   | sed -e's/AAA/\$1/g' > ${prefix}/root/fix-subsys.1
+cat ${prefix}/root/fix-subsys.1 | sed -e's/BBB/\$0/g' > ${prefix}/etc/init.d/fix-subsys
+
+# cleanup
+#chroot ${prefix} rm /root/fix-subsys.1  ${prefix}/root/fix-subsys
+
+# run it
+chroot  ${prefix}  chmod 755 /etc/init.d/fix-subsys
+chroot  ${prefix}  chkconfig --add fix-subsys
+chroot  ${prefix}  /etc/init.d/fix-subsys start
+
+
+#
+#  Log our finish
+#
+logMessage Script $0 finished
+
