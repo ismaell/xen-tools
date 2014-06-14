@@ -1,0 +1,77 @@
+#!/bin/sh
+#
+#  This role installs sudo with host sudoers file.
+#
+
+prefix=$1
+
+#
+#  Source our common functions - this will let us install a Debian package.
+#
+if [ -e /usr/share/xen-tools/common.sh ]; then
+    . /usr/share/xen-tools/common.sh
+else
+    echo "Installation problem"
+fi
+
+
+#
+# Log our start
+#
+logMessage Script $0 starting
+
+if [ ! -d ${prefix}/proc ]; then
+    mkdir -p ${prefix}/proc
+fi
+if [ ! -d ${prefix}/sys ]; then
+    mkdir -p ${prefix}/sys
+fi
+
+if [ ! -d ${prefix}/dev ]; then
+    mkdir -p ${prefix}/dev
+fi
+
+if [ ! -d ${prefix}/etc/sysctl.d ]; then
+    mkdir -p ${prefix}/etc/sysctl.d
+fi
+
+
+mount -o bind /proc ${prefix}/proc
+mount -o bind /sys ${prefix}/sys
+mount -o bind /dev ${prefix}/dev
+#
+
+chroot ${prefix} echo "kernel.sem = 250 256000 32 1024" >>${prefix}/etc/sysctl.conf
+chroot ${prefix} echo "#" >>${prefix}/etc/sysctl.conf
+chroot ${prefix} echo "#disable ipv6" >>${prefix}/etc/sysctl.conf
+chroot ${prefix} echo "net.ipv6.conf.all.disable_ipv6=1" >>${prefix}/etc/sysctl.conf
+chroot ${prefix} echo "#" >>${prefix}/etc/sysctl.conf
+chroot ${prefix} echo "#XEN tweaks" >>${prefix}/etc/sysctl.conf
+chroot ${prefix} echo "vm.swappiness=1" >>${prefix}/etc/sysctl.conf
+chroot ${prefix} echo "vm.min_free_kbytes = 8192" >>${prefix}/etc/sysctlonf
+
+chroot ${prefix} cat ${prefix}/etc/sysctl.conf |  egrep -v '(bridge-nf-call|netfilter)'  >${lprefix}/etc/sysctl.conf.1
+chroot ${prefix} mv ${prefix}/etc/sysctl.conf.1 ${prefix}/etc/sysctl.conf
+#
+umount -f ${prefix}/proc
+umount -f ${prefix}/sys
+umount -f  ${prefix}/dev
+
+
+# WARNING :
+#
+# Copying this file means that root users in guest will KNOW who is
+# root on host.
+#
+
+#
+# Copy dom0's file to domU.
+#
+cp /etc/sudoers ${prefix}/etc/
+chown root:root ${prefix}/etc/sudoers
+chmod 440 ${prefix}/etc/sudoers
+
+#
+#  Log our finish
+#
+logMessage Script $0 finished
