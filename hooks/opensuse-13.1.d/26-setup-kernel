@@ -54,6 +54,10 @@ done
 chroot ${prefix} zypper clean expire-cache
 #
 
+# oss specific : PBL_SKIP_BOOT_TEST reqired if /boot been not an mount
+chroot  ${prefix} test -x  /etc/profile.d/boot_pbl_skip_boot.sh || echo "export PBL_SKIP_BOOT_TEST=1" >/etc/profile.d/boot_pbl_skip_boot.sh; chmod 750 /etc/profile.d/boot_pbl_skip_boot.sh
+
+
 #
 # debug avalible kernel pkgs .. outputs to xen logfile
 #
