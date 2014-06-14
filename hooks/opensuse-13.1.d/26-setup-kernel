@@ -74,8 +74,8 @@ if [ ! -d ${prefix}/etc/initramfs-tools/conf.d/ ]; then
 mkdir -p ${prefix}/etc/initramfs-tools/conf.d/
 fi
 
-if [ ! -f ${prefix}/etc/initramfs-tools/conf.d/xen-moules ]; then
-echo "MODULES=xenblk xennet xen_blkfront xenfs xen-netfront" >$prefix/etc/initramfs-tools/conf.d/xen-moules
+if [ ! -f ${prefix}/etc/initramfs-tools/conf.d/xen-modules ]; then
+echo "MODULES=xenblk xennet xen_blkfront xenfs xen-netfront" >$prefix/etc/initramfs-tools/conf.d/xen-modules
 fi
 
 mount -o bind /proc ${prefix}/proc
