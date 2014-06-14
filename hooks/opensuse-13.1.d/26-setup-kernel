@@ -1,3 +1,41 @@
+#!/bin/sh
+#
+#  This script sets up the kernel and fstab for OpenSuSE 13.1
+#
+# https://github.com/remsnet/xen-tools
+
+prefix=$1
+
+#
+#  Source our common functions
+#
+if [ -e /usr/share/xen-tools/common.sh ]; then
+    . /usr/share/xen-tools/common.sh
+else
+    . ./hooks/common.sh
+fi
+
+#
+# Log our start
+#
+
+logMessage Script $0 starting
+
+
+
+
+
+# Make the console work
+sed -i "/Cancelled/ {G;s/$/co:2345:respawn:\/sbin\/mingetty console/;}" ${prefix}/etc/inittab
+sed -i "s/^1:2345/#1:2345/" ${prefix}/etc/inittab
+
+# MAKEDEV is needed at this point
+chroot ${prefix} ln -s /sbin/MAKEDEV /dev/MAKEDEV
+chroot ${prefix} /sbin/MAKEDEV sda sdb sdc sdd
+
+# Create fstab
+logMessage Create /etc/fstab
+cat > ${prefix}/etc/fstab << EOF
 # /etc/fstab: static file system information.
 #
 # <file system> <mount point>   <type>  <options>       <dump>  <pass>
@@ -20,7 +58,6 @@ done
 
 # Install the kernel, grub and perl
 
-set -x
 
 chroot ${prefix} zypper clean expire-cache
 #
@@ -37,6 +74,8 @@ cd  ${prefix}/lib/modules
                 chroot ${prefix} rm -rf /lib/modules/$i
         done
 cd
+
+
 
 #
 # debug avalible kernel pkgs .. outputs to xen logfile
