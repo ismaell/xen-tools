@@ -132,13 +132,6 @@ fi
 # FIX dirs , they must exist
 mkdir -p ${prefix}/{etc,dev,proc,sys,var/lock/rpm}
 
-set -x
-
-#Create necessary devices.
-for i in console null zero ; do /sbin/MAKEDEV -d $prefix/dev -x $i ; done
-#
-
-
 #
 #  Log our finish
 #
