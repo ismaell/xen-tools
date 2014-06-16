@@ -58,7 +58,9 @@ if ( test `ls -1 ${prefix}/dev | wc -l` -gt 10 ); then
     exit
 fi
 
-
+#Create necessary devices.
+for i in console null zero ; do /sbin/MAKEDEV -d $prefix/dev -x $i ; done
+#
 #
 #  Make the device nodes.
 #
