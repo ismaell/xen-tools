@@ -41,7 +41,7 @@ fi
 
 mount -o bind /proc ${prefix}/proc
 mount -o bind /sys ${prefix}/sys
-mcunt -o bind /dev ${prefix}/dev
+mount -o bind /dev ${prefix}/dev
 #
 chroot ${prefix} /usr/bin/zypper -v  refresh
 chroot ${prefix} /usr/bin/zypper -v  update --force --auto-agree-with-licenses
