@@ -44,6 +44,11 @@ mount -o bind /proc ${prefix}/proc
 mount -o bind /sys ${prefix}/sys
 mount -o bind /dev ${prefix}/dev
 #
+#
+chroot ${prefix} /usr/sbin/groupadd -g 490 nagcmd
+chroot ${prefix} /usr/sbin/groupadd -g 491 nagios
+chroot ${prefix} /usr/sbin/useradd -g 491 -m -d /var/lib/nagios -c"User for Nagios" -s /bin/bash nagios
+#
 chroot ${prefix} /usr/bin/zypper --non-interactive install nrpe nagios-plugins-nrpe
 #
 umount -f ${prefix}/proc
