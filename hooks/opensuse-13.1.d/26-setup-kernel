@@ -119,7 +119,7 @@ mount -o bind /proc ${prefix}/proc
 mount -o bind /sys ${prefix}/sys
 mount -o bind /dev ${prefix}/dev
 
-chroot ${prefix} grub2-mkconfig -o /boot/grub/grub.cfg
+chroot ${prefix} mkinitrd
 
 
 umount -f  ${prefix}/proc
