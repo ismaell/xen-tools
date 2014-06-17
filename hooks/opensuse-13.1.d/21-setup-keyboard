@@ -1,0 +1,40 @@
+#!/bin/sh
+#
+#  This script generates a default keyboard pc105 de no deathkey assignemnt OpenSuSe 13.1
+#  SuSE / Opensuse define keybord at with KEYTABLE variable at /etc/sysconfig/keyboard
+#
+#  customize it on your own needs.
+#
+# https://github.com/remsnet/xen-tools
+
+
+prefix=$1
+
+
+#
+#  Source our common functions
+#
+if [ -e /usr/share/xen-tools/common.sh ]; then
+    . /usr/share/xen-tools/common.sh
+else
+    . ./hooks/common.sh
+fi
+
+
+#
+# Log our start
+#
+logMessage Script $0 starting
+
+
+#
+# Install the English language pack.
+#
+#  NOTE:  Failure to support your favourite language is *not* a bug.
+#
+chroot ${prefix} cat /etc/sysconfig/keyboard | sed -e "s/KEYTABLE=\"\"/KEYTABLE=\"de-latin1-nodeadkeys\"/g" >/var/tmp/keyboard.new
+chroot ${prefix} mv /var/tmp/keyboard.new /etc/sysconfig/keyboard
+
+#
+#  Log our finish
+#
