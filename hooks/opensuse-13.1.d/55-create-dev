@@ -2,10 +2,8 @@
 #
 #  This script ensures that the new guest images have a nicely
 # populated /dev directory.
-#
-# Steve
-# --
-# http://www.steve.org.uk/
+
+# https://github.com/remsnet/xen-tools/
 
 
 prefix=$1
@@ -40,35 +38,17 @@ done
 
 if [ -n "${MAKEDEV}" ]; then
 
-#
-# Early termination if we have a couple of common devices present
-# should speed up installs which use --copy/--tar
-#
-if ( test `ls -1 ${prefix}/dev | wc -l` -gt 10 ); then
-    #
-    # We still need to make sure the basic devices are present
-    #
-    cd ${prefix}/dev
-    ${MAKEDEV} std
-    ${MAKEDEV} hda
-    ${MAKEDEV} sda
-    ${MAKEDEV} tty1
 
-    logMessage "Terminating because there appear to be files in /dev already"
-    exit
-fi
+for i in std hda sda tty1 console null zero generic
+        do
+        chroot ${prefix} /sbin/MAKEDEV -d /dev $i
+        done
 
-#Create necessary devices.
-for i in console null zero ; do /sbin/MAKEDEV -d $prefix/dev -x $i ; done
-#
-#
-#  Make the device nodes.
-#
-cd ${prefix}/dev
-${MAKEDEV} generic
-${MAKEDEV} std
+for i in xvda xvda1 xvda2 xvda3 xvda4 xvda5 xvda6
+        do
+                 chroot ${prefix} mknod /dev/$i 202 0
+        done
 
-fi # -n ${MAKEDEV}
 
 #
 #  Log our finish
