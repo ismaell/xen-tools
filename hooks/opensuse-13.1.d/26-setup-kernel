@@ -81,13 +81,13 @@ KERNELVERSION=`ls ${prefix}/boot/vmlinuz-* | xargs | awk -F " " '{ print $1 }' |
 logMessage "Kernel $KERNELVERSION found"
 
 # Create grub's menu.list
-logMessage "Creating /boot/grub2/menu.lst"
+logMessage "Creating /boot/grub/menu.lst"
 
-if [ ! -d ${prefix}/boot/grub2 ]; then
-        mkdir -p ${prefix}/boot/grub2
+if [ ! -d ${prefix}/boot/grub ]; then
+        mkdir -p ${prefix}/boot/grub
 fi
 
-cat > ${prefix}/boot/grub2/menu.lst << EOF
+cat > ${prefix}/boot/grub/menu.lst << EOF
 # WARNING : Don't forget to update this when you upgrade kernel !
 # You can also exclude kernel-xen from updates by putting
 # exclude=kernel-xen in in [main] in zypper.conf
@@ -102,13 +102,18 @@ EOF
 # Some use lvm but mkinitrd will generate a wrong initrd when these are present.
 rm -f ${prefix}/etc/lvm/backup/* ${prefix}/etc/lvm/archive/*
 
-if [ ! -d ${prefix}/etc/initramfs-tools/conf.d/ ]; then
-mkdir -p ${prefix}/etc/initramfs-tools/conf.d/
+if [ ! -d ${prefix}/etc/sysconfig ]; then
+mkdir -p ${prefix}/etc/sysconfig
 fi
 
-if [ ! -f ${prefix}/etc/initramfs-tools/conf.d/xen-modules ]; then
-echo "MODULES=xenblk xennet xen_blkfront xenfs xen-netfront" >$prefix/etc/initramfs-tools/conf.d/xen-modules
+
+if [  -f ${prefix}/etc/sysconfig/kernel ]; then
+cat ${prefix}/etc/sysconfig/kernel | sed -e "s/INITRD_MODULES=\"\"/INITRD_MODULES=\"xennet xenblk xenscsi netxen_nic xenbus_be sfc_netfront blktap tpm_xenu xfs loop i915 xen_wdt \"/" > ${prefix}/etc/sysconfig/kernel.new
+mv -f  ${prefix}/etc/sysconfig/kernel  ${prefix}/etc/sysconfig/kernel.orig
+mv  ${prefix}/etc/sysconfig/kernel.new -f  ${prefix}/etc/sysconfig/kernel
 fi
+
+
 
 mount -o bind /proc ${prefix}/proc
 mount -o bind /sys ${prefix}/sys
