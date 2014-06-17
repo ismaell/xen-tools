@@ -43,12 +43,12 @@ chroot ${prefix} ln -s /sbin/MAKEDEV /dev/MAKEDEV
 
 for i in std hda sda sdb sdc sdd tty tty1 tty2 tty3 tty4 tty5 tty6 tty7 tty8 console null zero ram mem kmsg rtc
         do
-        chroot ${prefix} cd /dev; /sbin/MAKEDEV  $i
+        chroot ${prefix}  /bin/bash ; cd /dev; /sbin/MAKEDEV  $i
         done
 
 for i in xvda xvda1 xvda2 xvda3 xvda4 xvda5 xvda6
         do
-                 chroot ${prefix} mknod /dev/$i 202 0
+                 chroot ${prefix}  /bin/bash ; mknod /dev/$i 202 0
         done
 
 
