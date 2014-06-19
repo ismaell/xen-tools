@@ -56,15 +56,6 @@ umount -f ${prefix}/proc
 umount -f ${prefix}/sys
 umount -f  ${prefix}/dev
 
-
-
-#
-umount -f ${prefix}/proc
-umount -f ${prefix}/sys
-umount -f  ${prefix}/dev
-
-
-
 #
 #  Log our finish
 #
