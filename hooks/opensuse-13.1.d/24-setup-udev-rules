@@ -45,7 +45,7 @@ chroot ${prefix} /usr/bin/zypper --non-interactive  install libudev0 udev libude
 
 
 #70-kpartx.rules
-cat >> ${prefix}/etc/udev/rules.d/70-kpartx.rules EEOOFF
+cat >> ${prefix}/etc/udev/rules.d/70-kpartx.rules << EEOOFF
 #
 # persistent links for device-mapper devices
 # only hardware-backed device-mapper devices (ie multipath, dmraid,
