@@ -70,9 +70,6 @@ chroot ${prefix} cd /etc/zypp/repos.d/; wget http://download.opensuse.org/reposi
 chroot ${prefix} zypper --non-interactive --gpg-auto-import-keys  ref
 
 
-#
-# debug avalible kernel pkgs .. outputs to xen logfile
-#
 chroot ${prefix} zypper --non-interactive install kernel-xen 
 chroot ${prefix} zypper --non-interactive update
 
@@ -82,9 +79,6 @@ logMessage "Kernel $KERNELVERSION found"
 # Create grub's menu.list
 logMessage "Creating /boot/grub/menu.lst"
 
-if [ ! -d ${prefix}/boot/grub ]; then
-        mkdir -p ${prefix}/boot/grub
-fi
 
 cat > ${prefix}/boot/grub/menu.lst << EOF
 # WARNING : Don't forget to update this when you upgrade kernel !
