@@ -1,0 +1,217 @@
+#!/bin/sh
+#
+#  This script installs the default /etc/udev/rules.d files bevor the kernel...
+#
+# https://github.com/remsnet/xen-tools
+
+prefix=$1
+
+#
+if [ -e /usr/share/xen-tools/common.sh ]; then
+    . /usr/share/xen-tools/common.sh
+else
+    echo "Installation problem"
+fi
+
+
+#
+# Log our start
+#
+logMessage Script $0 starting
+
+if [ ! -d ${prefix}/proc ]; then
+    mkdir -p ${prefix}/proc
+fi
+if [ ! -d ${prefix}/sys ]; then
+    mkdir -p ${prefix}/sys
+fi
+
+if [ ! -d ${prefix}/dev ]; then
+    mkdir -p ${prefix}/dev
+fi
+
+if [ ! -d ${prefix}/etc/udev/rules.d ]; then
+    mkdir -p ${prefix}/etc/udev/rules.d
+fi
+
+
+
+
+mount -o bind /proc ${prefix}/proc
+mount -o bind /sys ${prefix}/sys
+mount -o bind /dev ${prefix}/dev
+#
+chroot ${prefix} /usr/bin/zypper --non-interactive  install libudev0 udev libudev0-32bit
+
+
+#70-kpartx.rules
+cat >> ${prefix}/etc/udev/rules.d/70-kpartx.rules EEOOFF
+#
+# persistent links for device-mapper devices
+# only hardware-backed device-mapper devices (ie multipath, dmraid,
+# and kpartx) have meaningful persistent device names
+#
+
+KERNEL!="dm-*", GOTO="kpartx_end"
+ACTION=="remove", GOTO="kpartx_end"
+
+ENV{DM_TABLE_STATE}!="LIVE", GOTO="kpartx_end"
+ENV{DM_DEPS}=="0", GOTO="kpartx_end"
+
+ENV{DM_UUID}=="?*", IMPORT{program}=="kpartx_id %M %m $env{DM_UUID}"
+
+ENV{DM_ACTION}=="PATH_FAILED", ENV{DM_NR_VALID_PATHS}=="0", \
+        GOTO="blkid_end"
+ENV{DM_UUID}=="mpath-*", IMPORT{program}="/sbin/blkid -o udev -p $tempnode"
+ENV{DM_PART}=="?*", IMPORT{program}="/sbin/blkid -o udev -p $tempnode"
+LABEL="blkid_end"
+
+OPTIONS="link_priority=50"
+
+# Create persistent links for multipath tables
+ENV{DM_UUID}=="mpath-*", \
+        SYMLINK+="disk/by-id/$env{DM_TYPE}-$env{DM_NAME}"
+ENV{DM_MPATH}=="?*", ENV{DM_PART}!="?*", \
+        SYMLINK+="disk/by-id/$env{DM_TYPE}-$env{DM_MPATH}"
+ENV{DM_WWN}=="?*", ENV{DM_PART}!="?*", \
+        SYMLINK+="disk/by-id/wwn-$env{DM_WWN}"
+
+# Create persistent links for dmraid tables
+ENV{DM_UUID}=="DMRAID-*|dmraid-*", \
+        SYMLINK+="disk/by-id/$env{DM_TYPE}-$env{DM_NAME}"
+
+# Create persistent links for linear tables
+ENV{DM_UUID}=="linear-*", \
+        SYMLINK+="disk/by-id/$env{DM_TYPE}-$env{DM_NAME}"
+
+# Create persistent links for partitions
+ENV{DM_PART}=="?*", \
+        SYMLINK+="disk/by-id/$env{DM_TYPE}-$env{DM_NAME}-part$env{DM_PART}"
+ENV{DM_MPATH}=="?*", ENV{DM_PART}=="?*", \
+        SYMLINK+="disk/by-id/$env{DM_TYPE}-$env{DM_MPATH}-part$env{DM_PART}"
+ENV{DM_WWN}=="?*", ENV{DM_PART}=="?*", \
+        SYMLINK+="disk/by-id/wwn-$env{DM_WWN}-part$env{DM_PART}"
+
+# Create persistent by-label/by-uuid links
+ENV{ID_FS_USAGE}=="?*", IMPORT{db}="ID_FS_USAGE"
+ENV{ID_FS_UUID_ENC}=="?*", IMPORT{db}="ID_FS_UUID_ENC"
+ENV{ID_FS_USAGE}=="filesystem|other|crypto", ENV{ID_FS_UUID_ENC}=="?*", \
+        SYMLINK+="disk/by-uuid/$env{ID_FS_UUID_ENC}"
+ENV{ID_FS_LABEL_ENC}=="?*", IMPORT{db}="ID_FS_LABEL_ENC"
+ENV{ID_FS_USAGE}=="filesystem|other", ENV{ID_FS_LABEL_ENC}=="?*", \
+        SYMLINK+="disk/by-label/$env{ID_FS_LABEL_ENC}"
+
+# Create dm tables for partitions
+ENV{DM_ACTION}=="PATH_FAILED", ENV{DM_NR_VALID_PATHS}=="0", \
+        GOTO="kpartx_end"
+ENV{DM_STATE}!="SUSPENDED", ENV{DM_UUID}=="mpath-*", \
+        RUN+="/sbin/kpartx -u -p _part /dev/$kernel"
+ENV{DM_STATE}=="ACTIVE", ENV{DM_UUID}=="DMRAID-*|dmraid-*", \
+        RUN+="/sbin/kpartx -u -p _part /dev/$kernel"
+ENV{DM_STATE}=="ACTIVE", ENV{DM_UUID}=="linear-*", \
+        RUN+="/sbin/kpartx -u -p _part /dev/$kernel"
+
+LABEL="kpartx_end"
+
+#
+EEOOFF
+
+#70-kdump.rules
+cat >> ${prefix}/etc/udev/rules.d/70-kdump.rules << EEOOFF
+#
+# Kdump core headers needs to be regnerated if the CPUs or memory changes.
+# For this, reload kdump.
+#
+# Novell Bug #389658
+#
+
+SUBSYSTEM=="cpu", ACTION=="online", PROGRAM="/etc/init.d/kdump try-restart"
+SUBSYSTEM=="cpu", ACTION=="offline", PROGRAM="/etc/init.d/kdump try-restart"
+SUBSYSTEM=="memory", ACTION=="add", PROGRAM="/etc/init.d/kdump try-restart"
+SUBSYSTEM=="memory", ACTION=="remove", PROGRAM="/etc/init.d/kdump try-restart"
+
+EEOOFF
+
+#77-network.rules
+cat >> ${prefix}/etc/udev/rules.d/77-network.rules << EEOOFF
+
+#
+# Apply per interface sysctl settings before setup (see man 5 ifsysctl):
+#
+SUBSYSTEM=="net", ACTION=="add", RUN+="/etc/sysconfig/network/scripts/ifup-sysctl $env{INTERFACE} -o hotplug"
+
+#
+# The following rules are to:
+# - mark a (physical) interface as renamed to it's persistent name and
+#   ready to configure by the network service.
+# - set up a (physical) network interface automatically when there is
+#   a configuration for and the network service is already active.
+# - clean up things by calling ifdown when the interface gets removed
+#   (e.g. kill ifplugd or another daemon) and in fact vanished already.
+#
+# There are (virtual) interfaces, which are created with ifup. We have
+# to ignore these interfaces to avoid nested ifup / ifdown execution.
+# We do it here name based for the well known/default interface names,
+# ifup makes it again by interface type to catch also custom names.
+#
+SUBSYSTEM=="net", ENV{INTERFACE}=="lo*|dummy*|vif*.*|br*|bond*|vlan*|gre*|sit*|tap*|tun*|ipip*|ip6tnl*|ipsec*|ppp*|ippp*|isdn*|modem*|dsl*|plip*|irda*", GOTO="skip_ifup"
+SUBSYSTEM=="net", ACTION=="add", RUN+="/sbin/ifup $env{INTERFACE} -o hotplug"
+SUBSYSTEM=="net", ACTION=="remove", RUN+="/sbin/ifdown %k -o hotplug"
+LABEL="skip_ifup"
+
+EEOOFF
+
+# 70-persistent-cd.rules
+cat >> ${prefix}/etc/udev/rules.d/70-persistent-cd.rules << EEOOFF
+# This file was automatically generated by the /lib/udev/write_cd_rules
+# program, run by the cd-aliases-generator.rules rules file.
+#
+# You can modify it, as long as you keep each rule on a single
+# line, and set the $GENERATED variable.
+
+# Virtual_DVD-ROM (pci-0000:00:1d.7-usb-0:2:1.0-scsi-0:0:0:0)
+SUBSYSTEM=="block", ENV{ID_CDROM}=="?*", ENV{ID_SERIAL}=="HP_Virtual_DVD-ROM-0:0", SYMLINK+="cdrom1", ENV{GENERATED}="1"
+#
+EEOOFF
+
+
+#70-persistent-net.rules
+cat >> ${prefix}/etc/udev/rules.d/70-persistent-net.rules
+# This file was automatically generated by the /lib/udev/write_cd_rules
+# program, run by the cd-aliases-generator.rules rules file.
+#
+# You can modify it, as long as you keep each rule on a single
+# line, and set the $GENERATED variable.
+
+SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", KERNELS=="?*", ATTR{type}=="1", KERNEL=="eth*", NAME="eth0"
+
+EEOOFF
+
+
+# 81-mount.rules
+cat >> ${prefix}/etc/udev/rules.d/81-mount.rules << EEOOFF
+# Udev rules for udevmount
+
+# Skip 'add' events for device-mapper
+ACTION=="add", SUBSYSTEM=="block", KERNEL=="dm-*", GOTO="skip_mount"
+ACTION=="add", SUBSYSTEM=="block", KERNEL=="md*", GOTO="skip_mount"
+# don't handle crypto devices, boot.crypto does that already (bnc#569942)
+ACTION=="change", SUBSYSTEM=="block", KERNEL=="dm-*", ENV{DM_TARGET_TYPES}=="crypt", GOTO="skip_mount"
+ACTION=="add|change", SUBSYSTEM=="block", ENV{FSTAB_OPTS}=="*nofail*", IMPORT="udevmountd"
+
+ACTION=="add|change", ENV{FSCK_STATE}=="unknown|clean", RUN+="udevmountd add"
+ACTION=="remove", ENV{FSTAB_OPTS}=="*nofail*", RUN+="udevmountd remove"
+
+LABEL="skip_mount"
+#
+EEOOFF
+
+
+
+umount -f ${prefix}/proc
+umount -f ${prefix}/sys
+umount -f  ${prefix}/dev
+#
+#  Log our finish
+#
+logMessage Script $0 finished
