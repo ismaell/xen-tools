@@ -7,12 +7,10 @@
 prefix=$1
 
 #
-#  Source our common functions - this will let us install a Debian package.
-#
 if [ -e /usr/share/xen-tools/common.sh ]; then
     . /usr/share/xen-tools/common.sh
 else
-    echo "Installation problem"
+    echo "xen-tools Installation problem"
 fi
 
 
@@ -45,7 +43,7 @@ if [ ! -d ${prefix}/boot/grub ]; then
 fi
 
 #
-# create device.map
+# create device.map# create default device.map for XEN pygrub based root disk
 test -f ${prefix}/boot/grub/device.map && mv -f  ${prefix}/boot/grub/device.map  ${prefix}/boot/grub/device.map.old
 echo "(hd0)   /dev/xvda" > ${prefix}/boot/grub/device.map
 
