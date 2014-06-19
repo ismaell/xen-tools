@@ -73,8 +73,7 @@ chroot ${prefix} zypper --non-interactive --gpg-auto-import-keys  ref
 #
 # debug avalible kernel pkgs .. outputs to xen logfile
 #
-chroot ${prefix} zypper --non-interactive install perl-Bootloader perl-XML-Parser
-chroot ${prefix} zypper --non-interactive install kernel-xen  grub kernel-firmware kmod-compat mkinitrd
+chroot ${prefix} zypper --non-interactive install kernel-xen 
 chroot ${prefix} zypper --non-interactive update
 
 KERNELVERSION=`ls ${prefix}/boot/vmlinuz-* | xargs | awk -F " " '{ print $1 }' |sed "s#$prefix/boot/vmlinuz-##"`
