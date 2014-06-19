@@ -206,7 +206,8 @@ LABEL="skip_mount"
 #
 EEOOFF
 
-
+# trigger udev..
+chroot ${prefix} udevadm trigger
 
 umount -f ${prefix}/proc
 umount -f ${prefix}/sys
