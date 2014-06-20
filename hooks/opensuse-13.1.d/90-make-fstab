@@ -64,6 +64,7 @@ proc            /proc           proc    defaults        0       0
 devpts          /dev/pts        devpts  rw,noexec,nosuid,gid=5,mode=620 0  0
 sysfs           /sys            sysfs   noauto 0 0
 debugfs         /sys/kernel/debug       debugfs noauto 0 0
+tmpfs           /dev/shm        tmpfs   defaults 0 0
 #
 # http://wiki.centos.org/TipsAndTricks/TmpOnTmpfs
 tmpfs           /tmp            tmpfs   rw,nosuid,nodev 0 0
