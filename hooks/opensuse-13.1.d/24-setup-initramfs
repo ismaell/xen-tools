@@ -360,6 +360,9 @@ echo "Failed to switch_root, dropping to a shell"
 exec sh
 EOF
 
+chroot ${prefix} chmod 0755 /sbin/mkBusyBoxinitramfs /usr/share/mkinitramfs/BusyBoxramfs.init
+
+
 #
 #  Log our finish
 #
