@@ -7,7 +7,7 @@
 #
 # part of  https://github.com/remsnet/OpenSuSE-initramfs
 #
-# v0.1.6  - 22 june 2014
+# v0.1.7  - 22 june 2014
 # Author : Remsnet Consulting & internet Services LTD
 #          horst.venzke@remsnet.de
 # License : LGPL v2
@@ -26,10 +26,7 @@ export PATH
 mount -n -t devtmpfs devtmpfs /dev
 mount -n -t proc     proc     /proc
 mount -n -t sysfs    sysfs    /sys
-mount -n -t debugfs  debugfs /sys/kernel/debug
 mount -n -t tmpfs    tmpfs    /run
-mount -n -t devpts  devpts  /dev/pts
-
 
 #Disable kernel messages from popping onto the screen
 echo 0 > /proc/sys/kernel/printk
@@ -77,10 +74,10 @@ for i in $(cat /proc/cmdline); do
 done
 
 #Mount the root device
-mount "${root}" /newroot
+mount /dev/xvda2 /newroot
 
 #Check if $init exists and is executable
-if [[ -x "/newroot/${init}" ]] ; then
+if [[ -x "/newroot/sbin/init" ]] ; then
 
 # Unmount everything else you've attached to rootfs.
 # (Moving the filesystems  into newroot is something useful to do with them.)
@@ -89,13 +86,9 @@ mount --move /sys /newroot/sys
 mount --move /proc /newroot/proc
 mount --move /dev /newroot/dev
 mount --move /run /newroot/var/run
-mount --move /sys/kernel/debug /newroot/sys/kernel/debug
-
-mount --move /dev/pts /newroot/dev/pts
-
 
         #Switch to the new root and execute init
-        exec switch_root /newroot "${init}"
+        exec switch_root /newroot /sbin/init
 fi
 
 #This will only be run if the exec above failed
