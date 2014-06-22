@@ -14,7 +14,7 @@
 # ENV
 KERNEL_VERSION=`ls /boot/vmlinuz-* | xargs | awk -F " " '{ print $1 }' | sed "s#/boot/vmlinuz-##"`
 BOOT=/boot
-INITRAMFS_FILE=$BOOT/initramfs.img-$KERNEL_VERSION
+INITRAMFS_FILE=$BOOT/initramfs-$KERNEL_VERSION
 DATADIR=/usr/share/mkinitramfs
 INITIN=$DATADIR/BusyBoxramfs.init
 CPIOBIN=/usr/bin/cpio
