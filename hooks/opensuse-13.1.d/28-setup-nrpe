@@ -51,6 +51,9 @@ chroot ${prefix} /usr/sbin/useradd -g 491 -m -d /var/lib/nagios -c"User for Nagi
 #
 chroot ${prefix} /usr/bin/zypper --non-interactive install nrpe nagios-plugins-nrpe
 #
+chroot ${prefix} chkconfig nrpe on
+
+
 umount -f ${prefix}/proc
 umount -f ${prefix}/sys
 umount -f  ${prefix}/dev
