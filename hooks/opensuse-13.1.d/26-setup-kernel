@@ -139,6 +139,8 @@ mount -o bind /dev ${prefix}/dev
 
 
 chroot ${prefix} mkinitrd
+chroot ${prefix} /sbin/mkinitramfs
+
 
 umount -f  ${prefix}/proc
 umount -f  ${prefix}/sys
