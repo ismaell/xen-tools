@@ -37,8 +37,11 @@ if [ ! -d ${prefix}/var/run/netreport ]; then
 mkdir -p ${prefix}/var/run/netreport
 fi
 
+# setup devaliases
+echo "alias eth0 xennet" > /etc/modprobe.d/10-xen.conf
+echo "alias eth1 xennet" >> /etc/modprobe.d/10-xen.conf
+echo "alias scsi_hostadapter xenblk" >> /etc/modprobe.d/10-xen.conf
 
-set -x
 
 echo "dhcp value" ${dhcp}
 
@@ -59,6 +62,10 @@ IPADDR=${ip1}
 MTU=''
 NETMASK=${netmask}
 GATEWAY=${gateway}
+BROADCAST${broadcast}
+REMOTE_IPADDR=''
+USERCONTROL='no'
+#
 E_O_STATIC
 
      #
@@ -82,6 +89,10 @@ MTU=''
 BOOTPROTO=static
 IPADDR=${value}
 NETMASK=${netmask}
+BROADCAST${broadcast}
+REMOTE_IPADDR=''
+USERCONTROL='no'
+#
 E_O_STATIC
          count=`expr $count + 1`
          interface=`expr $interface + 1`
@@ -105,14 +116,15 @@ else
 STARTMODE='auto'
 NAME=eth0
 BOOTPROTO=dhcp
+USERCONTROL='no'
+#
 E_O_DHCP
     chroot ${prefix} /usr/bin/zypper --non-interactive install dhcpcd
 fi
 
 #
-#  Don't forget to setup the default route.
-#
-echo default ${gateway} - - dev eth0 >${prefix}/etc/sysconfig/routes
+# SuSE stype : setup the default route.
+echo "default" ${gateway} "- -"  >${prefix}/etc/sysconfig/network/routes
 
 #
 #  Log our finish
