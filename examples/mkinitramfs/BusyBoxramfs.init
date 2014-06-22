@@ -1,7 +1,11 @@
 #!/bin/sh
 
-# file : /init
-# https://github.com/remsnet/OpenSuSE-initramfs/busyboxramfs-init
+# xen-tools file : /etc/xen-tools/initramfs/BusyBoxramfs.init
+#
+# initramfs file : /init 
+# copied by hook 24-setup-initramfs to /etc/xen-tools/initramfs/BusyBoxramfs.init
+#
+# part of  https://github.com/remsnet/OpenSuSE-initramfs
 #
 # v0.1.6  - 22 june 2014
 # Author : Remsnet Consulting & internet Services LTD
