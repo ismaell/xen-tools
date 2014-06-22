@@ -63,8 +63,11 @@ WantedBy=default.target
 EOF
 
 chroot ${prefix} systemctl --global enable dbus.socket
-#
+
+# default system services
 chroot ${prefix} systemctl enable cron.service
+
+
 #
 #  Log our finish
 #
