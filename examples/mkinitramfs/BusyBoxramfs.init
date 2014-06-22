@@ -1,0 +1,99 @@
+#!/bin/sh
+
+# file : /init
+# https://github.com/remsnet/OpenSuSE-initramfs/busyboxramfs-init
+#
+# v0.1.6  - 22 june 2014
+# Author : Remsnet Consulting & internet Services LTD
+#          horst.venzke@remsnet.de
+# License : LGPL v2
+
+
+PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin
+export PATH
+
+# how it works:
+# If an initramfs is built into the kernel or passed to it,
+#the kernel will try to execute /init in the initramfs.
+#Usually /init is a shell script that will find and mount the root partition,
+#then switch_root onto the root partiton and execute /sbin/init.
+
+#Mount things needed to access hardware - devtmpfs been required
+mount -n -t devtmpfs devtmpfs /dev
+mount -n -t proc     proc     /proc
+mount -n -t sysfs    sysfs    /sys
+mount -n -t debugfs  debugfs /sys/kernel/debug
+mount -n -t tmpfs    tmpfs    /run
+mount -n -t devpts  devpts  /dev/pts
+
+
+#Disable kernel messages from popping onto the screen
+echo 0 > /proc/sys/kernel/printk
+
+#Clear the screen
+clear
+
+#Create all the symlinks to /bin/busybox if not allready exist at initramfs
+test -e /bin/bb ||busybox-static --install -s
+
+# Create necessary device nodes
+test -e /dev/console || mknod -m 640 /dev/console c 5 1
+test -e /dev/console || mknod -m 640 /dev/random c 1 8
+test -e /dev/console || mknod -m 640 /dev/urandom c 1 9
+test -e /dev/console || mknod -m 664 /dev/null    c 1 3
+test -e /dev/console || mknod -m 664 /dev/zero    c 1 5
+test -e /dev/console || mknod -m 664 /dev/tty     c 5 0
+test -e /dev/console || mknod -m 664 /dev/tty1    c 4 1
+test -e /dev/console || mknod -m 664 /dev/vcs     c 7 0
+test -e /dev/console || mknod -m 664 /dev/vcsa    c 7 128
+test -e /dev/console || mknod -m 664 /dev/xvda    b 202 0
+test -e /dev/console || mknod -m 664 /dev/loop0   b 7 0
+mdev -s
+
+#Function for parsing command line options with "=" in them
+# get_opt("init=/sbin/init") will return "/sbin/init"
+get_opt() {
+        echo "$@" | cut -d "=" -f 2
+}
+
+#Defaults
+init="/sbin/init"
+root="/dev/xvda2"
+
+#Process command line options
+for i in $(cat /proc/cmdline); do
+        case $i in
+                root\=*)
+                        root=$(get_opt $i)
+                        ;;
+                init\=*)
+                        init=$(get_opt $i)
+                        ;;
+        esac
+done
+
+#Mount the root device
+mount "${root}" /newroot
+
+#Check if $init exists and is executable
+if [[ -x "/newroot/${init}" ]] ; then
+
+# Unmount everything else you've attached to rootfs.
+# (Moving the filesystems  into newroot is something useful to do with them.)
+
+mount --move /sys /newroot/sys
+mount --move /proc /newroot/proc
+mount --move /dev /newroot/dev
+mount --move /run /newroot/var/run
+mount --move /sys/kernel/debug /newroot/sys/kernel/debug
+
+mount --move /dev/pts /newroot/dev/pts
+
+
+        #Switch to the new root and execute init
+        exec switch_root /newroot "${init}"
+fi
+
+#This will only be run if the exec above failed
+echo "Failed to switch_root, dropping to a shell"
+exec sh
