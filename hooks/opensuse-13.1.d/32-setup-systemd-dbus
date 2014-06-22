@@ -1,0 +1,71 @@
+#!/bin/sh
+#
+#  This script generates a default systemd configuration for dbus on OpenSuSe 13.1
+#  without the network.service donÂ´t start
+#
+
+# https://github.com/remsnet/xen-tools
+
+
+prefix=$1
+
+
+#
+#  Source our common functions
+#
+if [ -e /usr/share/xen-tools/common.sh ]; then
+    . /usr/share/xen-tools/common.sh
+else
+    . ./hooks/common.sh
+fi
+
+
+#
+# Log our start
+#
+logMessage Script $0 starting
+
+
+# http://en.opensuse.org/SDB:Systemd
+# https://wiki.archlinux.org/index.php/Systemd/User
+# https://bugzilla.redhat.com/show_bug.cgi?id=1010572
+# https://bugs.freedesktop.org/show_bug.cgi?id=61301
+#
+chroot ${prefix} mkdir -p /etc/systemd/system/user@.service.d/
+#
+cat >> ${prefix}/etc/systemd/system/user@.service.d/environment.conf << EOF
+[Service]
+        Environment=DISPLAY=:0
+        Environment=XDG_RUNTIME_DIR=/run/user/%I
+        Environment=SHELL=%s
+EOF
+
+cat >> ${prefix}/etc/systemd/user/dbus.service << EOF
+[Unit]
+Description=D-Bus Message Bus
+Requires=dbus.socket
+
+[Service]
+ExecStart=/usr/bin/dbus-daemon --session --address=systemd: --nofork --nopidfile --systemd-activation
+ExecReload=/usr/bin/dbus-send --print-reply --session --type=method_call --dest=org.freedesktop.DBus / org.freedesktop.DBus.ReloadConfig
+EOF
+
+cat >> ${prefix}/etc/systemd/user/dbus.socket << EOF
+[Unit]
+Description=D-Bus Message Bus Socket
+Before=sockets.target
+
+[Socket]
+ListenStream=/run/user/%U/bus
+
+[Install]
+WantedBy=default.target
+EOF
+
+chroot ${prefix} systemctl --global enable dbus.socket
+#
+chroot ${prefix} systemctl enable cron.service
+#
+#  Log our finish
+#
+logMessage Script $0 finished
