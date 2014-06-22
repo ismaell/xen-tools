@@ -255,7 +255,6 @@ cleanup
 
 msg_end
 #
-# EOF
 EOF
 
 cat >>${prefix}/usr/share/mkinitramfs/BusyBoxramfs.init << EOF
