@@ -41,7 +41,7 @@ install -m 755 /etc/xen-tools/initramfs/mkBusyBoxinitramfs ${prefix}/sbin/mkBusy
 
 # installs the initramfs init template
 test -d ${prefix}/usr/share/mkinitramfs || mkdir -p  ${prefix}/usr/share/mkinitramfs
-install -m 755 /etc/xen-tools/initramfs/BusyBoxramfs.init ${prefix}/usr/share/mkinitramfs/BusyBoxramfs.init F
+install -m 755 /etc/xen-tools/initramfs/BusyBoxramfs.init ${prefix}/usr/share/mkinitramfs/BusyBoxramfs.init 
 
 chroot ${prefix} chmod 0755 /sbin/mkBusyBoxinitramfs /usr/share/mkinitramfs/BusyBoxramfs.init
 #
