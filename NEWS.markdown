@@ -1,3 +1,15 @@
+xen-tools 4.4.rcis2-dev02 (Forked release  22-June-2014)
+- added 24-setup-initramfs,
+  busybox initramfs for opensuse 13.1 as an workaround for issues not mounted /dev/xvda2 , 
+   caused by not automounted devtmpfs witch caused that the xenblk (xen bl front ) was not loated .
+  oss 13.1 dracut BUG : don not generate an valid initramfs 
+- oss 13.1 boots now  as centos6.5 with xen 4.4 domU - currenty with network issue.
+- added oss13.1 hook 23-setup-udev-rules
+- added oss13.1 hook 23-setup-grub 
+- added oss13.1 hook 21-setup-keyboard
+- added oss13.1 hook 22-setup-bashrc
+- updated 95-clean-image, 90-make-fstab, 55-create-dev , 40-setup-networking
+
 xen-tools 4.4.rcis2-dev01 (Forked release  14-June-2014)
 - added experimental opensuse 13.1 hooek support.
 - added prestage funtion for distros like opensuse to setup cleanly chroot - without  that  , the OSS autodeplyment failed .
@@ -20,7 +32,7 @@ xen-tools 4.4.rcis1 (Forked release  27-Mai-2014)
  Steven kemp Noted April 2014 to us :
  "Thanks for sharing, but you should know that I no longer take
   part in any xen-tools development. Instead the project was
-  handed over to folks who had more time and energy to continue  with it.
+  handed over to xen-tools.org folks who had more time and energy to continue  with it.
   Your contribution would be best shared with the mailing list here:
   http://xen-tools.org/mailman/listinfo/xen-tools-discuss
   Apologies for the slow reply; I've been on holiday.
