@@ -5,7 +5,7 @@
 # guest file : /sbin/mkBusyBoxinitramfs, copyied by 24-setup-initramfs
 # part of https://github.com/remsnet/OpenSuSE-initramfs
 #
-# v0.0.4  - 22 june 2014
+# v0.0.5  - 23 june 2014
 # Author : Remsnet Consulting & internet Services LTD
 #          horst.venzke@remsnet.de
 # License : LGPL v2
@@ -98,6 +98,14 @@ cd $WDIR/usr
  ln -s ../lib lib
 cd
 
+
+# make shure  mountpoints been created
+for i in dev etc proc sys lock tmp newroot
+do
+mkdir -p $WDIR/$i
+done
+
+
 # Create necessary device nodes
 mknod -m 640 $WDIR/dev/console c 5 1
 mknod -m 640 $WDIR/dev/random c 1 8
@@ -127,6 +135,15 @@ done
 if [ -f /etc/mdadm.conf ] ; then
   copy /etc/mdadm.conf $WDIR/etc
 fi
+
+# add simplefstab
+cat >>/etc/fstab << EOF
+devtmpfs        /dev                    devtmpfs        rw,mode=0755 0 0
+proc            /proc                   proc            defaults        0       0
+sysfs           /sys                    sysfs           rw 0 0
+tmpfs           /tmp            tmpfs   rw,nosuid,nodev 0 0
+EOF
+
 
 # install /usr/bin/busybox-static
 install -m 0755 /usr/bin/busybox-static $WDIR/bin/busybox-static
