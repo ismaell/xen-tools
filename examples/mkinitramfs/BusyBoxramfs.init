@@ -73,6 +73,8 @@ for i in $(cat /proc/cmdline); do
         esac
 done
 
+# load required modules
+/bin/modprobe cdrom
 /bin/modprobe xennet
 /bin/modprobe xenblk
 /bin/modprobe sfc_netfront
