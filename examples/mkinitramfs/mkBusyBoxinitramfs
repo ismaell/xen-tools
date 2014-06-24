@@ -3,7 +3,7 @@
 # file : /sbin/mkBusyBoxinitramfs
 # part of https://github.com/remsnet/OpenSuSE-initramfs
 #
-# v0.0.3  - 22 june 2014
+# v0.0.6  - 22 june 2014
 # Author : Remsnet Consulting & internet Services LTD
 #          horst.venzke@remsnet.de
 # License : LGPL v2
