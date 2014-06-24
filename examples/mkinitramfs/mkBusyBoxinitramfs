@@ -3,7 +3,7 @@
 # file : /sbin/mkBusyBoxinitramfs
 # part of https://github.com/remsnet/OpenSuSE-initramfs
 #
-# v0.0.6  - 22 june 2014
+# v0.0.7  - 22 june 2014
 # Author : Remsnet Consulting & internet Services LTD
 #          horst.venzke@remsnet.de
 # License : LGPL v2
@@ -24,7 +24,7 @@ WDIR=$(mktemp -d /tmp/initrd-work.XXXXXXXXXX)
 unsorted=$(mktemp /tmp/unsorted.XXXXXXXXXX)
 
 binfiles=""
-sbinfiles="lvm"
+sbinfiles=""
 
 # we log what happen - xen-tools 24-setup-initramfs autoinstall hook
 test -d /var/log/xen-tools || mkdir -p /var/log/xen-tools/
