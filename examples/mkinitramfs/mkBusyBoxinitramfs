@@ -133,7 +133,7 @@ if [ -f /etc/mdadm.conf ] ; then
 fi
 
 # add simplefstab
-cat >>/etc/fstab << EOF
+cat >>$WDIR/etc/fstab << EOF
 devtmpfs        /dev                    devtmpfs        rw,mode=0755 0 0
 proc            /proc                   proc            defaults        0       0
 sysfs           /sys                    sysfs           rw 0 0
