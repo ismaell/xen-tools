@@ -88,14 +88,14 @@ done
 echo "INITRAMFS loaded Modules:"
 lsmod | awk '{ print $1 }' |xargs
 
-if [ -z "${init}" ]; then
-        echo "INITRAMFS: Using $init as root device"
+if [ ! -z $init ]; then
+        echo "INITRAMFS: Using $init "
 else
         echo "INITRAMFS WARNING : init=  kernel comandline option been empty"
         echo "INITRAMFS maybe fail"
 fi
 
-if [ -z "${root}" ]; then
+if [ ! -z $root ]; then
         echo "INITRAMFS: Using ${root} as root device"
         mount --rw "${root}" /newroot
 else
@@ -103,8 +103,6 @@ else
         echo "INITRAMFS maybe fail"
 fi
 
-#Mount the root device
-mount -o rw $root /newroot
 
 #Check if $init exists and is executable
 if [[ -x /newroot/$init ]] ; then
