@@ -22,6 +22,18 @@ export PATH
 #Usually /init is a shell script that will find and mount the root partition,
 #then switch_root onto the root partiton and execute /sbin/init.
 
+
+# create mountpoints
+mkdir -p /dev /etc /proc /sys /run /lock /tmp
+
+# add simplefstab
+cat >>/etc/fstab << EOF
+devtmpfs        /dev                    devtmpfs        rw,mode=0755 0 0
+proc            /proc                   proc            defaults        0       0
+sysfs           /sys                    sysfs           rw 0 0
+tmpfs           /tmp            tmpfs   rw,nosuid,nodev 0 0
+EOF
+
 #Mount things needed to access hardware - devtmpfs been required
 mount -n -t devtmpfs devtmpfs /dev
 mount -n -t proc     proc     /proc
