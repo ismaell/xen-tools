@@ -118,7 +118,7 @@ cat > ${prefix}/boot/grub/menu.lst << EOF
 default=0
 timeout=5
 title OpenSuSE  x86_64 13.1 ($KERNELVERSION) Paravirtual Guest
-kernel        /boot/vmlinuz-$KERNELVERSION init=/sbin/oss-xen-init elevator=noop console=tty0 console=hvc0 noresume selinux=0 initcall_debug load_ramdisk=1 root=/dev/xvda2 rdinit=/bin/sh
+kernel        /boot/vmlinuz-$KERNELVERSION init=/sbin/init elevator=noop console=tty0 console=hvc0 noresume selinux=0 initcall_debug load_ramdisk=1 root=/dev/xvda2 rdinit=/bin/sh
 initrd        /boot/initramfs-$KERNELVERSION
 EOF
 
