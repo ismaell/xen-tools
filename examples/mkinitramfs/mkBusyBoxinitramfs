@@ -219,6 +219,15 @@ find_lvm_libs >/dev/null 2>&1
 # copy lvm binary and libs
 copy_lvm
 
+# initalize LVM at boot
+test -d $WDIR/etc/sysconfig || mkdir -p $WDIR/etc/sysconfig
+test -f  $WDIR/etc/sysconfig/lvm || >$WDIR/etc/sysconfig/lvm
+echo "#" >$WDIR/etc/sysconfig/lvm >$WDIR/etc/sysconfig/lvm
+echo "# https://www.suse.com/documentation/sles11/stor_admin/data/lvm_activate_vgs.html" >$WDIR/etc/sysconfig/lvm
+echo "#" >$WDIR/etc/sysconfig/lvm
+echo LVM_VGS_ACTIVATED_ON_BOOT="" >$WDIR/etc/sysconfig/lvm
+echo LVM_ACTIVATED_ON_DISCOVERED="disable" >$WDIR/etc/sysconfig/lvm
+
 
 # Add lvm symlinks if appropriate
 # Also copy the lvm.conf file
