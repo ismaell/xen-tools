@@ -1,11 +1,9 @@
 #!/bin/sh
 #
-# xen-tools file : /etc/xen-tools/initramfs/mkBusyBoxinitramfs
-#
-# guest file : /sbin/mkBusyBoxinitramfs, copyied by 24-setup-initramfs
+# file : /sbin/mkBusyBoxinitramfs
 # part of https://github.com/remsnet/OpenSuSE-initramfs
 #
-# v0.0.5  - 23 june 2014
+# v0.0.3  - 22 june 2014
 # Author : Remsnet Consulting & internet Services LTD
 #          horst.venzke@remsnet.de
 # License : LGPL v2
@@ -98,13 +96,11 @@ cd $WDIR/usr
  ln -s ../lib lib
 cd
 
-
 # make shure  mountpoints been created
 for i in dev etc proc sys lock tmp newroot
 do
 mkdir -p $WDIR/$i
 done
-
 
 # Create necessary device nodes
 mknod -m 640 $WDIR/dev/console c 5 1
@@ -144,7 +140,6 @@ sysfs           /sys                    sysfs           rw 0 0
 tmpfs           /tmp            tmpfs   rw,nosuid,nodev 0 0
 EOF
 
-
 # install /usr/bin/busybox-static
 install -m 0755 /usr/bin/busybox-static $WDIR/bin/busybox-static
 cd $WDIR/bin/
@@ -167,6 +162,62 @@ for f in $sbinfiles ; do
   copy $f $WDIR/sbin/$f
 done
 
+#--------------------------------------------------
+# lvm stuff
+
+function find_lvm ()
+{
+>/tmp/find.lvm
+cat >>/tmp/find.lvm <<EOF
+for i in /bin /sbin /usr/bin /usr/sbin
+ do
+   find II -name lvm
+ done
+EOF
+ cat /tmp/find.lvm |sed -e"s/II/\$i/" >/tmp/find1.lvm
+chmod 755 /tmp/find1.lvm
+/tmp/find1.lvm >/tmp/lvmbin
+
+lvmbin=`cat /tmp/lvmbin`
+echo $lvmbin
+}
+
+function find_lvm_ldd ()
+{
+/usr/bin/ldd $lvmbin
+}
+
+function find_lvm_libList ()
+{
+find_lvm_ldd | awk -F = '{ print $1 }'| awk -F" " '{ print $1 }'
+}
+
+>/tmp/find_lvm_libs
+function find_lvm_libs ()
+{
+for i in `find_lvm_ldd`
+do
+        find / -wholename $i >>/tmp/find_lvm_libs 2>&1
+done
+}
+
+function copy_lvm ()
+{
+mkdir -p $WDIR/lib
+mkdir -p $WDIR/sbin
+cp -f $lvmbin $WDIR/sbin/
+for i in `cat /tmp/find_lvm_libs`
+do
+        cp $i $WDIR/lib/
+done
+}
+
+# exec find_lvm find_lvm_libs
+find_lvm >/dev/null 2>&1
+find_lvm_libs >/dev/null 2>&1
+
+# copy lvm binary and libs
+copy_lvm
 
 
 # Add lvm symlinks if appropriate
@@ -195,6 +246,7 @@ cd $WDIR/bin
   # Conf file(s)
   copyall /etc/lvm $WDIR/etc
 fi
+#-------------------------------------------------------
 
 # Install libraries
 sort $unsorted | uniq | while read library ; do
@@ -226,8 +278,6 @@ if [ -n "$KERNEL_VERSION" ]; then
 fi
 
 
-
-
 # make the initramfs
 make_initramfs >> /var/log/xen-tools/initramfs.log 2>&1
 
@@ -236,4 +286,3 @@ cleanup
 
 msg_end
 #
-
