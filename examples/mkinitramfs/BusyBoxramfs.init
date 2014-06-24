@@ -10,7 +10,8 @@
 
 
 PATH=$PATH:/bin:/sbin:/usr/bin:/usr/sbin
-export PATH
+TERM=vt100
+export PATH TERM
 
 # how it works:
 # If an initramfs is built into the kernel or passed to it,
