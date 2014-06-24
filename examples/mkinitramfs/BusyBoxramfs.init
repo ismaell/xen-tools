@@ -19,7 +19,7 @@ export PATH
 #then switch_root onto the root partiton and execute /sbin/init.
 
 # create mountpoints
-mkdir -p /dev /etc /proc /sys /run /lock /tmp
+mkdir -p /dev /etc /proc /sys /run /lock /tmp /newroot
 
 # add simplefstab
 cat >>/etc/fstab << EOF
