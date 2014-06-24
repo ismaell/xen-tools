@@ -3,7 +3,7 @@
 # file : /init
 # https://github.com/remsnet/OpenSuSE-initramfs/busyboxramfs-init
 #
-# v0.1.6  - 22 june 2014
+# v0.1.7  - 23 june 2014
 # Author : Remsnet Consulting & internet Services LTD
 #          horst.venzke@remsnet.de
 # License : LGPL v2
@@ -21,13 +21,6 @@ export PATH
 # create mountpoints
 mkdir -p /dev /etc /proc /sys /run /lock /tmp /newroot
 
-# add simplefstab
-cat >>/etc/fstab << EOF
-devtmpfs        /dev                    devtmpfs        rw,mode=0755 0 0
-proc            /proc                   proc            defaults        0       0
-sysfs           /sys                    sysfs           rw 0 0
-tmpfs           /tmp            tmpfs   rw,nosuid,nodev 0 0
-EOF
 
 #Mount things needed to access hardware - devtmpfs been required
 mount -n -t devtmpfs devtmpfs /dev
