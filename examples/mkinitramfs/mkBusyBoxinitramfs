@@ -196,6 +196,7 @@ if [ -d /lib/systemd ]; then
   copyall /lib/systemd $WDIR/lib/ >> /var/log/xen-tools/initramfs.log 2>&1
 fi
 
+# Install the kernel modules if requested
 if [ -n "$KERNEL_VERSION" ]; then
   find                                                                        \
      /lib/modules/$KERNEL_VERSION/kernel/{crypto,fs,lib,drivers,net,security,mm,sound}                      \
@@ -206,6 +207,7 @@ if [ -n "$KERNEL_VERSION" ]; then
 
   depmod -b $WDIR $KERNEL_VERSION >> /var/log/xen-tools/initramfs.log 2>&1
 fi
+
 
 
 
