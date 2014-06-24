@@ -1,13 +1,9 @@
 #!/bin/sh
 
-# xen-tools file : /etc/xen-tools/initramfs/BusyBoxramfs.init
+# file : /init
+# https://github.com/remsnet/OpenSuSE-initramfs/busyboxramfs-init
 #
-# initramfs file : /init 
-# copied by hook 24-setup-initramfs to /etc/xen-tools/initramfs/BusyBoxramfs.init
-#
-# part of  https://github.com/remsnet/OpenSuSE-initramfs
-#
-# v0.1.7  - 22 june 2014
+# v0.1.6  - 22 june 2014
 # Author : Remsnet Consulting & internet Services LTD
 #          horst.venzke@remsnet.de
 # License : LGPL v2
@@ -22,7 +18,6 @@ export PATH
 #Usually /init is a shell script that will find and mount the root partition,
 #then switch_root onto the root partiton and execute /sbin/init.
 
-
 # create mountpoints
 mkdir -p /dev /etc /proc /sys /run /lock /tmp
 
@@ -34,11 +29,14 @@ sysfs           /sys                    sysfs           rw 0 0
 tmpfs           /tmp            tmpfs   rw,nosuid,nodev 0 0
 EOF
 
+
+
 #Mount things needed to access hardware - devtmpfs been required
 mount -n -t devtmpfs devtmpfs /dev
 mount -n -t proc     proc     /proc
 mount -n -t sysfs    sysfs    /sys
 mount -n -t tmpfs    tmpfs    /run
+
 
 #Disable kernel messages from popping onto the screen
 echo 0 > /proc/sys/kernel/printk
@@ -84,6 +82,15 @@ for i in $(cat /proc/cmdline); do
                         ;;
         esac
 done
+
+
+/bin/modprobe xennet
+/bin/modprobe xenblk
+/bin/modprobe sfc_netfront
+/bin/modprobe xen-blktap
+
+echo "INITRAMFS loaded Modules:
+lsmod | awk '{ print $1 }' |xargs
 
 #Mount the root device
 mount /dev/xvda2 /newroot
