@@ -1,0 +1,80 @@
+#!/bin/sh
+#
+# This script generates a default /root/.bashrc , symlink to /root/.profile and an /etc/profile.d/bashexec.sh
+#
+# customize it on your own needs.
+#
+# https://github.com/remsnet/xen-tools
+
+
+prefix=$1
+
+
+#
+# Source our common functions
+#
+if [ -e /usr/share/xen-tools/common.sh ]; then
+    . /usr/share/xen-tools/common.sh
+else
+    . ./hooks/common.sh
+fi
+
+
+#
+# Log our start
+#
+logMessage Script $0 starting
+
+
+#
+# Install the English language pack.
+#
+# NOTE: Failure to support your favourite language is *not* a bug.
+#
+test -d ${prefix}/root || mkdir -p ${prefix}/root
+cat >>${prefix}/root/.bashrc << EOF
+
+
+# .bashrc
+
+# User specific aliases and functions
+
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+
+
+test -s ~/.alias && . ~/.alias || true
+
+
+export LS_OPTIONS="--human --color=always"
+alias ls='ls $LS_OPTIONS'
+alias ll='ls $LS_OPTIONS -l'
+alias l='ls $LS_OPTIONS -Al'
+
+TERM=xterm
+EDITOR=vi
+VISUAL=vi
+PAGER=less
+
+TZ='Europe/Vienna'; export TZ
+
+PS1="\u@\h:\W# "
+export PS1
+
+export TERM EDITOR VISUAL PAGER
+
+EOF
+
+
+
+chroot ${prefix} test -f /root/.bashrc &&ln -s /root/.bashrc /root/.profile
+
+chroot ${prefix} test -x /etc/profile.d/bashexec.sh || echo -n "test -f ~/.bashrc && . ~/.bashrc" >/etc/profile.d/bashexec.sh; chmod 755 /etc/profile.d/bashexec.sh
+
+#
+# Log our finish
+#
+logMessage Script $0 finish
+#
