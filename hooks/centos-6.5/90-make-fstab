@@ -73,6 +73,9 @@ tmpfs           /tmp            tmpfs   rw,nosuid,nodev 0 0
 tmpfs           /var/run        tmpfs   rw,nosuid,nodev,noexec,mode=1755 0 0
 tmpfs           /var/lock       tmpfs   rw,nosuid,nodev,noexec 0 0
 #
+# ssh, bash  etc pp require it https://bugzilla.redhat.com/show_bug.cgi?id=682321
+none /dev/shm tmpfs defaults,size=2G 0 0
+#
 E_O_FSTAB
 for part in `seq 1 ${NUMPARTITIONS}`; do
     eval "PARTITION=\"\${PARTITION${part}}\""
