@@ -73,6 +73,7 @@ chroot ${prefix} test -f /root/.bashrc &&ln -s /root/.bashrc /root/.profile
 
 chroot ${prefix} test -x /etc/profile.d/bashexec.sh || echo -n "test -f ~/.bashrc && .  ~/.bashrc" >/etc/profile.d/bashexec.sh; chmod 755 /etc/profile.d/bashexec.sh
 
+
 #
-#  Log our finish
+logMessage Script $0 finish
 #
