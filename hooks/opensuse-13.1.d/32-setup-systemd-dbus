@@ -56,10 +56,11 @@ Description=D-Bus Message Bus Socket
 Before=sockets.target
 
 [Socket]
-ListenStream=/run/user/%U/bus
+ListenStream=/run/user/%U/dbus/user_bus_socket
 
 [Install]
 WantedBy=default.target
+Also=dbus.service
 EOF
 
 chroot ${prefix} systemctl --global enable dbus.socket
