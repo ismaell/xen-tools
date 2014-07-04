@@ -1,0 +1,43 @@
+#!/bin/sh
+#
+#  This script generates a default hotplug configuration for on OpenSuSe 13.1
+#
+
+# https://github.com/remsnet/xen-tools
+
+
+prefix=$1
+
+
+#
+#  Source our common functions
+#
+if [ -e /usr/share/xen-tools/common.sh ]; then
+    . /usr/share/xen-tools/common.sh
+else
+    . ./hooks/common.sh
+fi
+
+
+#
+# Log our start
+#
+logMessage Script $0 starting
+
+
+chroot ${prefix} mkdir -p /etc/sysconfig
+#
+test -e ${prefix}//etc/sysconfig/hotplug || cat >> ${prefix}//etc/sysconfig/hotplug << EOF
+#
+#http://tr.opensuse.org/SDB:SUSE_Linux_Hotplug_System_Overview
+HOTPLUG_PCI_QUEUE_NIC_EVENTS=no
+NOHOTPLUG=yes
+NOCOLDPLUG=yes
+HOTPLUG_TRACE=3
+HOTPLUG_DEBUG=max
+#
+EOF
+#
+#  Log our finish
+#
+logMessage Script $0 finished
