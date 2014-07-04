@@ -48,4 +48,4 @@ chroot ${prefix} chmod 0755 /sbin/mkBusyBoxinitramfs /usr/share/mkinitramfs/Busy
 #  Log our finish
 #
 logMessage Script $0 finished
-[root@ex40 opensuse-13.1.d]#
+#
