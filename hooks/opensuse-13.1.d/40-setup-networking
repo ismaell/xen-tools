@@ -37,10 +37,9 @@ if [ ! -d ${prefix}/var/run/netreport ]; then
 mkdir -p ${prefix}/var/run/netreport
 fi
 
-# setup xennet devaliases
-echo "alias eth0 xennet" > /etc/modprobe.d/10-xennet.conf
-echo "alias eth1 xennet" >> /etc/modprobe.d/10-xennet.conf
-
+## setup devaliases
+echo "alias eth0 xennet" > ${prefix}/etc/modprobe.d/10-xen.conf
+echo "alias eth1 xennet" >> ${prefix}/etc/modprobe.d/10-xen.conf
 
 
 echo "dhcp value" ${dhcp}
