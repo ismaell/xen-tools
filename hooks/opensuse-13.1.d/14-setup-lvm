@@ -1,0 +1,45 @@
+#!/bin/sh
+#
+#  This script generates a default lvm configuration for on OpenSuSe 13.1
+#
+
+# https://github.com/remsnet/xen-tools
+
+
+prefix=$1
+
+
+#
+#  Source our common functions
+#
+if [ -e /usr/share/xen-tools/common.sh ]; then
+    . /usr/share/xen-tools/common.sh
+else
+    . ./hooks/common.sh
+fi
+
+
+#
+# Log our start
+#
+logMessage Script $0 starting
+
+
+chroot ${prefix} mkdir -p /etc/sysconfig
+#
+test -e ${prefix}//etc/sysconfig/lvm || cat >> ${prefix}//etc/sysconfig/lvm << EOF
+#
+#http://tr.opensuse.org/SDB:SUSE_Linux_Hotplug_System_Overview
+# initalize LVM at boot
+test -f  ${prefix}/etc/sysconfig/lvm || mv ${prefix}/etc/sysconfig/lvm ${prefix}/etc/sysconfig/lvm.old
+echo "#" >${prefix}/etc/sysconfig/lvm
+echo "# https://www.suse.com/documentation/sles11/stor_admin/data/lvm_activate_vgs.html" ${prefix}/etc/sysconfig/lvm
+echo "#" >${prefix}/etc/sysconfig/lvm
+echo LVM_VGS_ACTIVATED_ON_BOOT="" >${prefix}/etc/sysconfig/lvm
+echo LVM_ACTIVATED_ON_DISCOVERED="disable" >${prefix}/etc/sysconfig/lvm
+#
+EOF
+#
+#  Log our finish
+logMessage Script $0 finished
+#
