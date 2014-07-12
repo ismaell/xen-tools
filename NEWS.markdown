@@ -1,3 +1,8 @@
+xen-tools 4.4.rcis2-dev03 (Forked release  12-July-2014)
+- added  patch-fix --hash_method=expect as an bugfix workarround for the incompatible sha512 salt for opensuse / sles
+  this expects  dir/etc/xen-tools/expect/ exist and look for i.e an expect chat script opensuse-13.1-passwd.exp 
+  This require perl modules  IPC::Cmd  and File::Copy on dom0 and expect to be installed in the domU.
+
 xen-tools 4.4.rcis2-dev02 (Forked release  22-June-2014)
 - added 24-setup-initramfs,
   busybox initramfs for opensuse 13.1 as an workaround for issues not mounted /dev/xvda2 , 
