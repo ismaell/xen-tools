@@ -1,0 +1,149 @@
+--- /usr/bin/xen-create-image.bk.6july  2014-07-06 11:14:51.923000000 +0200
++++ /usr/bin/xen-create-image.bk.12jul2 2014-07-12 21:24:46.925000000 +0200
+@@ -102,7 +102,7 @@
+
+    --hash_method=algorithm
+                 Override the default hashing method of sha256 and use
+-                the provided algorithm. Can be : md5, sha256 or sha512
++                the provided algorithm. Can be : md5, sha256, sha512 or expect
+
+    --hooks=1    Specify whether to run hooks after the image is created.
+
+@@ -809,6 +809,8 @@
+ use Term::UI;
+ use Term::ReadLine;
+ use Xen::Tools::Common;
++use IPC::Cmd qw[can_run run];
++use File::Copy;
+
+
+ #
+@@ -1429,10 +1431,10 @@
+     #
+     #  Default values for passwords
+     #
+-    $CONFIG{ 'genpass' }     = 1;
+-    $CONFIG{ 'genpass_len' } = 8;
+-    $CONFIG{ 'password' }    = '';
+-    $CONFIG{ 'hash_method' } = 'sha256';
++    $CONFIG{ 'genpass' }        = 1;
++    $CONFIG{ 'genpass_len' }    = 8;
++    $CONFIG{ 'password' }       = '';
++    $CONFIG{ 'hash_method' }    = 'sha256';
+
+     #
+     #  The program to run to create a filesystem.
+@@ -1553,8 +1555,8 @@
+             message => "must be a valid ethernet mac address.\n",
+         },
+         hashMethod => {
+-            check   => qr/^md5|sha256|sha512$/i,
+-            message => "must be md5, sha256 or sha512.\n",
++            check   => qr/^md5|sha256|sha512|expect$/i,
++            message => "must be md5, sha256, sha512 or expect.\n",
+         },
+         uri => {
+             check   => sub { is_uri($_[0]) },
+@@ -1733,7 +1735,7 @@
+             "genpass-len=i", \&checkOption,
+             "genpass_len=i", \&checkOption,
+             "password=s",   \&checkOption,
+-            "hash_method=s",\&checkOption,
++            "hash_method=s", \&checkOption,
+             "partitions=s", \&checkOption,
+             "role=s",       \&checkOption,
+             "role-args=s",  \&checkOption,
+@@ -4038,6 +4040,8 @@
+             my $salt = generatePassword(8);
+
+             my $hash_method;
++            my $hash;
++
+             if ($CONFIG{ 'hash_method' } eq 'md5')
+             {
+                 $hash_method = '$1$';
+@@ -4050,12 +4054,82 @@
+             {
+                 $hash_method = '$6$';
+             }
++            elsif ($CONFIG{ 'hash_method' } eq 'expect')
++            {
++                # check if expect is installed
++                # look for  /etc/xen-tools/expect/<distro>-passwd.exp
++                my $expect_file = sprintf("%s-passwd.exp",  lc $CONFIG{'dist'});
++                my $expect_path = sprintf("/etc/xen-tools/expect/%s",  $expect_file);
++
++                unless (-e $expect_path) {
++                    fail("looks like $expect_path doesn't exists, mkpasswd is not installed");
++                }
++
++                # check for dependencies
++                if (!can_run('tcl') && !can_run('tclsh')) {
++                    fail("looks like tcl is not installed\n");
++                }
++
++                unless (can_run('expect')) {
++                    fail("looks like expect is not installed\n");
++                }
++
++                unless (can_run('mkpasswd')) {
++                    fail("looks like mkpasswd is not installed\n");
++                }
++
++                # call expect script
++               my $expect_path_inside_chroot = sprintf("/root/%s", $expect_file);
++               my $chroot_expect_path        = sprintf("%s/%s", $MOUNT_POINT, $expect_path_inside_chroot);
++
++                logprint("copy $expect_path to $chroot_expect_path\n");
++               if (!copy($expect_path, $chroot_expect_path)) {
++                    fail("cannot copy $expect_path to $chroot_expect_path\n");
++                }
++
++                logprint("chmod 0755 $chroot_expect_path\n");
++               chmod 0755, $chroot_expect_path;
++
++               logprint("mount some paths");
++
++                eval {
++                    `chroot $MOUNT_POINT mount /proc`;
++                    `chroot $MOUNT_POINT mount /sys`;
++                    `chroot $MOUNT_POINT mount /dev`;
++                    `chroot $MOUNT_POINT mount /tmp`;
++                    `chroot $MOUNT_POINT mount /dev/pts`;
++                };
++
++                if ($@) {
++                    logprint($@);
++                }
++
++                logprint("call chroot $MOUNT_POINT $expect_path_inside_chroot root $PASSWORD\n");
++
++                my $expect_output = `chroot $MOUNT_POINT $expect_path_inside_chroot root $PASSWORD`;
++
++                logprint("chroot $MOUNT_POINT $expect_path_inside_chroot root $PASSWORD returned $expect_output\n");
++
++                eval {
++                    `chroot $MOUNT_POINT umount /dev/pts`;
++                    `chroot $MOUNT_POINT umount /tmp`;
++                    `chroot $MOUNT_POINT umount /dev`;
++                    `chroot $MOUNT_POINT umount /sys`;
++                    `chroot $MOUNT_POINT umount /proc`;
++                };
++
++                if ($@) {
++                    logprint($@);
++                }
++
++               exit 0;
++            }
+             else
+             {
+-                fail("oops... unknown hashing method, should not happen!");
++                fail("oops... unknown hashing method, should not happen!\n");
+             }
+
+-            my $hash = crypt($PASSWORD, $hash_method . $salt);
++            $hash = crypt($PASSWORD, $hash_method . $salt) unless $hash;
+
+             #
+             #  Copy the file to ensure the original retains the correct
