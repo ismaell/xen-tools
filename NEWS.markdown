@@ -3,6 +3,10 @@ xen-tools 4.4.rcis2-dev03 (Forked release  12-July-2014)
   this expects  dir  /etc/xen-tools/expect exist and look for i.e an expect chat script opensuse-13.1-passwd.exp 
   This require perl modules  IPC::Cmd  and File::Copy on dom0 and expect to be installed in the domU.
 
+- updated & moved to grub2  for opensuse13.1 hooks 23-setup-grub, 26-setup-kernel
+  Thanks to Ismael Luceno for the patch Contribution.
+  This require copy of the pygrub  PYGRUB_VER = 0.6 at least to work.
+
 xen-tools 4.4.rcis2-dev02 (Forked release  22-June-2014)
 - added 24-setup-initramfs,
   busybox initramfs for opensuse 13.1 as an workaround for issues not mounted /dev/xvda2 , 
