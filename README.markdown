@@ -31,7 +31,12 @@ xen-tools currently has scripts to install most releases of
 some RPM-based distributions. On the Dom0 side all current Xen
 supporting distributions should work.
 
+
+Supported Distrubutions 
+-----
+
 The Folloing  releases are tested and known to work reliably  aka "Supported" :
+
 
 ### Debian
 
