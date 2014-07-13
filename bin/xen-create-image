@@ -102,7 +102,7 @@ and EVMS EXAMPLE.
 
    --hash_method=algorithm
                 Override the default hashing method of sha256 and use
-                the provided algorithm. Can be : md5, sha256 or sha512
+                the provided algorithm. Can be : md5, sha256, sha512 or expect
 
    --hooks=1    Specify whether to run hooks after the image is created.
 
@@ -150,6 +150,9 @@ and EVMS EXAMPLE.
    --noswap     Do not create a swap partition. When this option is
                 used the system will not have a swap entry added to
                 its /etc/fstab file either.
+
+   --no-xen-ok  Don't complain if xen seems not installed or xend is
+                not running. (Needed for the testsuite.)
 
    --output=dir Specify the output directory to create the xen
                 configuration file within.
@@ -772,7 +775,7 @@ Install an X11 server, using VNC and XDM
  Steve Kemp, http://www.steve.org.uk/
  Axel Beckert, http://noone.org/abe/
  Dmitry Nedospasov, http://nedos.net/
- Stéphane Jourdois
+ StÃ©phane Jourdois
 
 
 =head1 LICENSE
@@ -806,6 +809,8 @@ use Data::Validate::Domain qw/ is_hostname /;
 use Term::UI;
 use Term::ReadLine;
 use Xen::Tools::Common;
+use IPC::Cmd qw[can_run run];
+use File::Copy;
 
 
 #
@@ -1060,11 +1065,13 @@ if ( $CONFIG{ 'install' } )
 
     #
     #  Did that work?
-    #
-    if ( !-x $MOUNT_POINT . "/bin/ls" )
-    {
+    # Check /bin/ls and /usr/bin/ls
+    # http://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard
+    if (!isFileExecutable($MOUNT_POINT . "/bin/ls") && !isFileExecutable($MOUNT_POINT . "/usr/bin/ls")) {
         logprint("System installation failed: /bin/ls missing.  Aborting.\n");
+
         $CONFIG{'FAIL'} = 1;
+
         exit 127;
     }
 
@@ -1077,6 +1084,55 @@ if ( $CONFIG{ 'install' } )
     }
 }
 
+
+=begin doc
+
+  Check if file exist then check if file is symlink or binary.
+  If symlink then folow symlink and check if that been executable.
+
+=end doc
+
+=cut
+
+sub isFileExecutable {
+    my ($file) = @_;
+
+    # Missing file
+    return 0 unless -e $file;
+
+    # Is a symlink ?
+    if (-l $file) {
+            # Follow the symlink
+            my $linked_file = undef;
+            eval {
+                $linked_file = readlink($file);
+
+                # add base path
+                my $linked_file_dirname = dirname($linked_file);
+
+                # the symlink in the same directory ?
+                if ($linked_file_dirname eq '.') {
+                    my $file_dirname = dirname($file);
+
+                     $linked_file = $file_dirname . '/' . $linked_file;
+                }
+            };
+
+            # Could not retrive the linked file or it's not executable
+            if ($@ || !$linked_file || !-x $linked_file) {
+                return 0;
+            }
+            else {
+                return 1;
+            }
+    }
+    else {
+        # File exists, not symlink and executable
+        return 1 if (-x $file);
+    }
+
+    return 0;
+}
 
 
 #
@@ -1193,6 +1249,95 @@ EOF
             exit 127;
         }
     }
+
+
+    #
+    #  Test the system has a valid (network-script) + (vif-script) setup.
+    #
+    testXenConfig();
+
+}
+
+
+
+=begin doc
+
+  Test that the current Xen host has a valid network configuration,
+ this is designed to help newcomers to Xen.
+
+=end doc
+
+=cut
+
+sub testXenConfig
+{
+
+    # wierdness.
+    return if ( !-d "/etc/xen" );
+
+    #
+    #  Temporary hash.
+    #
+    my %cfg;
+
+    #
+    # Read the configuration file.
+    #
+    open( CONFIG, "<", "/etc/xen/xend-config.sxp" ) or
+      fail("Failed to read /etc/xen/xend-config.sxp: $!");
+    while (<CONFIG>)
+    {
+        next if ( !$_ || !length($_) );
+
+        # vif
+        if ( $_ =~ /^\(vif-script ([^)]+)/ )
+        {
+            $cfg{ 'vif-script' } = $1;
+        }
+
+        # network
+        if ( $_ =~ /^\(network-script ([^)]+)/ )
+        {
+            $cfg{ 'network-script' } = $1;
+        }
+    }
+    close(CONFIG);
+
+    if ( !defined( $cfg{ 'network-script' } ) ||
+         !defined( $cfg{ 'vif-script' } ) )
+    {
+        print <<EOF;
+
+WARNING
+-------
+
+  You appear to have a missing vif-script, or network-script, in the
+ Xen configuration file /etc/xen/xend-config.sxp.
+
+  Please fix this and restart Xend, or your guests will not be able
+ to use any networking!
+
+EOF
+    }
+    else
+    {
+        if ( ( $cfg{ 'network-script' } =~ /dummy/i ) ||
+             ( $cfg{ 'vif-script' } =~ /dummy/i ) )
+        {
+
+            print <<EOF;
+WARNING
+-------
+
+  You appear to have a "dummy" vif-script, or network-script, setting
+ in the Xen configuration file /etc/xen/xend-config.sxp.
+
+  Please fix this and restart Xend, or your guests will not be able to
+ use any networking!
+
+EOF
+        }
+    }
 }
 
 
@@ -1264,6 +1409,7 @@ sub setupDefaultOptions
     chomp($CONFIG{ 'arch' });
     $CONFIG{ 'fs' }            = 'ext3';
     $CONFIG{ 'force' }         = 0;
+    $CONFIG{ 'no_xen_ok' }     = 0;
     $CONFIG{ 'install' }       = 1;
     $CONFIG{ 'hooks' }         = 1;
     $CONFIG{ 'partitions' }    = '';
@@ -1285,10 +1431,10 @@ sub setupDefaultOptions
     #
     #  Default values for passwords
     #
-    $CONFIG{ 'genpass' }     = 1;
-    $CONFIG{ 'genpass_len' } = 8;
-    $CONFIG{ 'password' }    = '';
-    $CONFIG{ 'hash_method' } = 'sha256';
+    $CONFIG{ 'genpass' }        = 1;
+    $CONFIG{ 'genpass_len' }    = 8;
+    $CONFIG{ 'password' }       = '';
+    $CONFIG{ 'hash_method' }    = 'sha256';
 
     #
     #  The program to run to create a filesystem.
@@ -1409,8 +1555,8 @@ sub checkOption
             message => "must be a valid ethernet mac address.\n",
         },
         hashMethod => {
-            check   => qr/^md5|sha256|sha512$/i,
-            message => "must be md5, sha256 or sha512.\n",
+            check   => qr/^md5|sha256|sha512|expect$/i,
+            message => "must be md5, sha256, sha512 or expect.\n",
         },
         uri => {
             check   => sub { is_uri($_[0]) },
@@ -1589,14 +1735,14 @@ sub parseCommandLineArguments
             "genpass-len=i", \&checkOption,
             "genpass_len=i", \&checkOption,
             "password=s",   \&checkOption,
-            "hash_method=s",\&checkOption,
+            "hash_method=s", \&checkOption,
             "partitions=s", \&checkOption,
             "role=s",       \&checkOption,
             "role-args=s",  \&checkOption,
             "finalrole=s",       \&checkOption,
             "roledir=s",    \&checkOption,
             "force!",       \$CONFIG{ 'force' },
-            "no-xen-ok",    sub { warn "Option --no-xen-ok is deprecated and ignored."; },
+            "no-xen-ok",    \$CONFIG{ 'no_xen_ok' },
             "keep!",        \$CONFIG{ 'keep' },
             "template=s",   \&checkOption,
             "output=s",     \&checkOption,
@@ -2992,7 +3138,8 @@ sub createLVMBits
             # Delete if forcing
             if ( $CONFIG{ 'force' } )
             {
-                unless ( xenRunning($CONFIG{ 'hostname' }, \%CONFIG)) {
+                if ( $CONFIG{ 'no_xen_ok' } or
+                     !xenRunning($CONFIG{ 'hostname' }, \%CONFIG)) {
                     logprint(
                         "Removing $lvm_disk - since we're forcing the install\n");
                     runCommand("lvremove --force $lvm_disk", \%CONFIG);
@@ -3893,6 +4040,8 @@ sub setupRootPassword
             my $salt = generatePassword(8);
 
             my $hash_method;
+            my $hash;
+
             if ($CONFIG{ 'hash_method' } eq 'md5')
             {
                 $hash_method = '$1$';
@@ -3905,12 +4054,82 @@ sub setupRootPassword
             {
                 $hash_method = '$6$';
             }
+            elsif ($CONFIG{ 'hash_method' } eq 'expect')
+            {
+                # check if expect is installed
+                # look for  /etc/xen-tools/expect/<distro>-passwd.exp
+                my $expect_file = sprintf("%s-passwd.exp",  lc $CONFIG{'dist'});
+                my $expect_path = sprintf("/etc/xen-tools/expect/%s",  $expect_file);
+
+                unless (-e $expect_path) {
+                    fail("looks like $expect_path doesn't exists, mkpasswd is not installed");
+                }
+
+                # check for dependencies
+                if (!can_run('tcl') && !can_run('tclsh')) {
+                    fail("looks like tcl is not installed\n");
+                }
+
+                unless (can_run('expect')) {
+                    fail("looks like expect is not installed\n");
+                }
+
+                unless (can_run('mkpasswd')) {
+                    fail("looks like mkpasswd is not installed\n");
+                }
+
+                # call expect script
+                my $expect_path_inside_chroot = sprintf("/root/%s", $expect_file);
+                my $chroot_expect_path        = sprintf("%s/%s", $MOUNT_POINT, $expect_path_inside_chroot);
+
+                logprint("copy $expect_path to $chroot_expect_path\n");
+                if (!copy($expect_path, $chroot_expect_path)) {
+                    fail("cannot copy $expect_path to $chroot_expect_path\n");
+                }
+
+                logprint("chmod 0755 $chroot_expect_path\n");
+                chmod 0755, $chroot_expect_path;
+
+                logprint("mount some paths");
+
+                eval {
+                    `chroot $MOUNT_POINT mount /proc`;
+                    `chroot $MOUNT_POINT mount /sys`;
+                    `chroot $MOUNT_POINT mount /dev`;
+                    `chroot $MOUNT_POINT mount /tmp`;
+                    `chroot $MOUNT_POINT mount /dev/pts`;
+                };
+
+                if ($@) {
+                    logprint($@);
+                }
+
+                logprint("call chroot $MOUNT_POINT $expect_path_inside_chroot root $PASSWORD\n");
+
+                my $expect_output = `chroot $MOUNT_POINT $expect_path_inside_chroot root $PASSWORD`;
+
+                logprint("chroot $MOUNT_POINT $expect_path_inside_chroot root $PASSWORD returned $expect_output\n");
+
+                eval {
+                    `chroot $MOUNT_POINT umount /dev/pts`;
+                    `chroot $MOUNT_POINT umount /tmp`;
+                    `chroot $MOUNT_POINT umount /dev`;
+                    `chroot $MOUNT_POINT umount /sys`;
+                    `chroot $MOUNT_POINT umount /proc`;
+                };
+
+                if ($@) {
+                    logprint($@);
+                }
+
+                exit 0;
+            }
             else
             {
-                fail("oops... unknown hashing method, should not happen!");
+                fail("oops... unknown hashing method, should not happen!\n");
             }
 
-            my $hash = crypt($PASSWORD, $hash_method . $salt);
+            $hash = crypt($PASSWORD, $hash_method . $salt) unless $hash;
 
             #
             #  Copy the file to ensure the original retains the correct
@@ -4020,6 +4239,76 @@ sub unMountImage
     }
 
     $MOUNT_POINT = undef;
+}
+
+
+=begin getIfCfg
+
+    Get getIfCfg based on IP, netmask and broadcast address
+
+=cut
+
+sub getIfCfg {
+    my ($ip, $netmask, $broadcast) = @_;
+
+    my $network_info = getNetworkInfo($ip, $netmask);
+
+    my $ossip1  = sprintf("%s/%s", $ip, $network_info->{cidr});
+    my $network = $network_info->{ip};
+
+    my $opensuse_config = <<CONFIG
+STARTMODE='auto'
+BOOTPROTO='static'
+BROADCAST=$broadcast
+NETMASK=$netmask
+NAME='eth0'
+ETHTOOL_OPTIONS=''
+IPADDR=$ossip1
+MTU=''
+NETWORK=$network
+REMOTE_IPADDR=''
+USERCONTROL='no'
+E_O_STATIC
+CONFIG
+;
+
+    return $opensuse_config;
+}
+
+
+=begin getNetworkInfo
+
+    Get network IP and cidr based on IP and Netmask using ipcalc
+
+=cut
+
+sub getNetworkInfo {
+    my ($ip, $netmask) = @_;
+
+    my $cidr       = '';
+    my $network_ip = '';
+
+    open my $FILE, "/bin/ipcalc/ipcalc -b -c $ip $netmask|" or die "can't $!";
+    while (my $line = <$FILE>) {
+        chomp $line;
+
+        if ($line =~ /Network/i) {
+            my (undef, $ip_cidr) = split(':', $line);
+
+            ($network_ip, $cidr) = split('/', $ip_cidr);
+
+            $cidr       =~ s/\s+//g;
+            $network_ip =~ s/\s+//g;
+        }
+    }
+    close $FILE;
+
+    fail("Cannot parse CIDR and Network") if (!$cidr && !$network_ip);
+
+    return {
+        cidr => $cidr,
+        ip   => $network_ip,
+    };
 }
 
 
