@@ -103,12 +103,12 @@ Requirements
 
 To use these tools you'll need the following software on Dom0: <br>
 
-   Tool                 Source URL                        - what + distro 
+   Tool                 Source URL                        - what      + distro  <br>
     
-* [debootstrap](http://packages.debian.org/debootstrap)   - bootstrap on debian/ubuntu 
-* [fakeroot](http://packages.debian.org/fakeroot)         - chroot helper 
-* [rpmstrap](https://github.com/blipvert/rpmstrap)        - rpmstrap for rpmbased 
-* [rinse] http://collab-maint.alioth.debian.org/rinse)    - bootstrap on RHEL / FC / SuSE / SLES 
+* [debootstrap](http://packages.debian.org/debootstrap)   - bootstrap +  debian/ubuntu  <br>
+* [fakeroot](http://packages.debian.org/fakeroot)         - chroot helper <br>
+* [rpmstrap](https://github.com/blipvert/rpmstrap)        - rpmstrap   +  rpmbased install helper <br>
+* [rinse] (http://collab-maint.alioth.debian.org/rinse)    - bootstrap  +   RHEL / FC / SuSE / SLES  <br>
 
 * Perl and the following Perl modules
   Requires: perl(Text::Template) <br>
