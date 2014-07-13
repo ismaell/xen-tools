@@ -101,7 +101,7 @@ requirements.
 Requirements
 ------------
 
-To use these tools you'll need the following software on Dom0:
+To use these tools you'll need the following software on Dom0: <br>
 
 * [debootstrap](http://packages.debian.org/debootstrap)
 * [fakeroot](http://packages.debian.org/fakeroot)
@@ -109,37 +109,37 @@ To use these tools you'll need the following software on Dom0:
 * [rinse] http://collab-maint.alioth.debian.org/rinse)
 
 * Perl and the following Perl modules
-  Requires: perl(Text::Template)
-  Requires: perl(Config::IniFiles)
-  Requires: perl(Expect::Simple) perl(Expect)
-  Requires: perl(Getopt::Long)
-  Requires: perl(LWP::UserAgent)
-  Requires: perl(Pod::Usage)
-  Requires: perl(File::Basename)
-  Requires: perl(File::Find)
-  Requires: perl(File::Path)
-  Requires: perl(File::Temp)
-  Requires: perl(File::Which)
-  Requires: perl(File::Copy)
-  Requires: perl(Term::UI)
-  Requires: perl(Term::ReadLine)
-  Requires: perl(IPC::Cmd)
-  Requires: perl(Digest::MD5)
-  Requires: perl(Data::Validate::URI)
-  Requires: perl(Data::Validate::IP)
-  Requires: perl(Data::Validate::Domain)
+  Requires: perl(Text::Template) <br>
+  Requires: perl(Config::IniFiles) <br>
+  Requires: perl(Expect::Simple) perl(Expect) <br>
+  Requires: perl(Getopt::Long) <br>
+  Requires: perl(LWP::UserAgent) <br>
+  Requires: perl(Pod::Usage) <br>
+  Requires: perl(File::Basename) <br>
+  Requires: perl(File::Find) <br>
+  Requires: perl(File::Path) <br>
+  Requires: perl(File::Temp) <br>
+  Requires: perl(File::Which) <br>
+  Requires: perl(File::Copy) <br>
+  Requires: perl(Term::UI) <br>
+  Requires: perl(Term::ReadLine) <br>
+  Requires: perl(IPC::Cmd) <br>
+  Requires: perl(Digest::MD5) <br>
+  Requires: perl(Data::Validate::URI) <br>
+  Requires: perl(Data::Validate::IP) <br>
+  Requires: perl(Data::Validate::Domain) <br>
 
-Most of them are delivered by distributions , thus this are only an question of allmost 
-to use the native distro package tools (apt-get / yum / zypper / yast / rpm / ... ) within hook
-If not found in distribution - use i.e http://www.rpmfind.net, http://www.debfind.de
-Or install them via  perl CPAN .
+Most of them are delivered by distributions , thus this are only an question of allmost  <br>
+to use the native distro package tools (apt-get / yum / zypper / yast / rpm / ... ) within hook <br>
+If not found in distribution - use i.e http://www.rpmfind.net, http://www.debfind.de <br>
+Or install them via  perl CPAN . <br>
  
-* To use the --hash_method=expect you need expect installed on domU:
-  [expect] (http://expect.sourceforge.net/)
-  expect  require tcl to be installed.
+* To use the --hash_method=expect you need expect installed on domU: <br>
+  [expect] (http://expect.sourceforge.net/) <br>
+  expect  require tcl to be installed. <br>
   
-  This been currently in use at ( oss13.1 : 29-setup-expect ) for autpdeploy inital random root pwd at opensuse 13.x  xen guest.
-  expect can be autoremoved as well after with --finalrole=remove_expect for those that have an security concern about it .
+This been currently in use at ( oss13.1 : 29-setup-expect ) for autpdeploy inital random root pwd at opensuse 13.x  xen guest. <br>
+expect can be autoremoved as well after with --finalrole=remove_expect for those that have an security concern about it . <br>
 
 * gnu make,and compiler ,  rpmbuild tools  if you are not installing through a package manager.
 
