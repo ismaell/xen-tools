@@ -1,0 +1,40 @@
+#!/bin/sh
+#
+#  --finalrole=remove_expect
+#  This script uninstall the expect tool
+#
+# https://github.com/remsnet/xen-tools
+
+
+prefix=$1
+
+#  Source our common functions - this will let us install a Debian package.
+#
+if [ -e /usr/share/xen-tools/common.sh ]; then
+    . /usr/share/xen-tools/common.sh
+else
+    echo "Installation problem"
+fi
+
+
+
+# Log our start
+#
+logMessage Script $0 starting
+
+mount -o bind /proc ${prefix}/proc
+mount -o bind /sys ${prefix}/sys
+mount -o bind /dev ${prefix}/dev
+
+#
+chroot ${prefix} rpm -e --nodeps expect
+
+#
+umount -f ${prefix}/proc
+umount -f ${prefix}/sys
+umount -f ${prefix}/dev
+
+#
+#  Log our finish
+#
+logMessage Script $0 finished
