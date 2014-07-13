@@ -6,6 +6,14 @@ See KNOWN_BUGS.markdown for real bugs.
 Bugs to fix and features to add for 5.0
 ---------------------------------------
 
+* add slackware 13.x support dom0 :
+  - add InstallSlackPackage()  instead use of --install-method=tar
+  -  DomU hooks: network , passwd , udev ... same was as for opensuse 13.1 
+  -  DomU roles
+
+* update fedora hooks
+
+
 * Switch build-system to autotools or something CPANish.
 
 * `xen-create-image` man page overhaul:
@@ -16,13 +24,15 @@ Bugs to fix and features to add for 5.0
 
 * Roles overhaul
 
-  * Remove udev role. No more makes sense. udev gets pulled in by
-    kernels where necessary.
-
+* move udev to hooks
+  - done for centos 6.5
+  - done for opensuse 13.1
+ 
 * Test and support more file system types.
 
   Actually this should be pretty simple now that the parameters are
   stored in the configuration hash.
+  
 
 * Setup locales in the hooks?
 
@@ -80,13 +90,15 @@ Bugs to fix and features to add for 5.0
 
 * LVM snapshot support as an install source.
 
-* Generic grub support
+* Generic grub / grub2  support
 
   This will generate a much nicer `menu.lst` as a side effect, as its
   currently generated once at install, and is never updated. Installing
   a full grub into the domU should update the `menu.lst` every time a
   new kernel is installed and will also use the domU distro's `menu.lst`
   conform.
+  
+  grub2 -> fixed for opensuse 13.1 but require an pygrub update.
 
 * pv-grub support
 
@@ -102,14 +114,6 @@ Bugs to fix and features to add for 5.0
   releases created on `make install`. It probably would be better if
   we would just have one directory per distro (like with debian) but
   without the need to created symlinks on `make install`.
-
-  Currently CentOS's `25-setup-kernel` creates an fstab and
-  `90-make-fstab` does again. It works, but that cries for debugging
-  hell.
-
-  `centos-5/25-setup-kernel` and `centos-6/25-setup-kernel` still
-  differ and I'm not sure if that's necessary respectively what's the
-  common denominator.
 
   `80-install-kernel` is not yet merged into one hook script.
 
