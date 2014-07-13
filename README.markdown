@@ -141,7 +141,7 @@ Or install them via  perl CPAN . <br>
   expect  require tcl to be installed. <br>
   
 This been currently in use at ( oss13.1 : 29-setup-expect ) for autpdeploy inital random root pwd at opensuse 13.x  xen guest. <br>
-expect can be autoremoved as well after with --finalrole=remove_expect for those that have an security concern about it . <br>
+expect can be autoremoved as well after with --finalrole=remove_rpm_expect for those that have an security concern about it . <br>
 
 * gnu make,and compiler ,  rpmbuild tools  if you are not installing through a package manager.
 
