@@ -132,7 +132,7 @@ To use these tools you'll need the following software on Dom0: <br>
   Requires: perl(Data::Validate::Domain) <br>
 
 Most of them are delivered by distributions , thus this are only an question of allmost  <br>
-to use the native distro package tools (apt-get / yum / zypper / yast / rpm / ... ) within hook <br>
+to use the native distro package tools (apt-get / yum / zypper / yast / rpm / ... )  <br>
 If not found in distribution - use i.e http://www.rpmfind.net, http://www.debfind.de <br>
 Or install them via  perl CPAN . <br>
  
@@ -145,7 +145,8 @@ expect can be autoremoved as well after with --finalrole=remove_rpm_expect for t
 
 * gnu make,and compiler ,  rpmbuild tools  if you are not installing through a package manager.
 
-* [rinse] (http://collab-maint.alioth.debian.org/rinse)  sample configs for centos6.5 added under examples -  this are fully tested .<br>
+* [rinse] (http://collab-maint.alioth.debian.org/rinse)  
+Sample configs for centos6.5 , opensuse 13.1 added under examples - they are fully tested .<br>
 Rinse require fakeroot and rpmstrap to work cleanly. <br>
 
 If you wish to create new Xen instances which may be controlled by <br>
@@ -159,9 +160,8 @@ Installation from Source
 
 As root or with sudo, execute `make instal`.
 
-See `debian/README.source` how to build the Debian package from a
-checked out copy of the git repository (i.e. without a source tar
-ball).
+For Debian/Ubuntu  see `debian/README.source` how to build the Debian package from a<br>
+checked out copy of the git repository (i.e. without a source tarball).<br>
 
 
 Installation from RPMbuild
@@ -170,7 +170,7 @@ Installation from RPMbuild
  - picup specfile & build  patches  from  https://github.com/remsnet/xen-tools-rpmbuild
    add them to rpmbuild´s SPECS dir  i.e /usr/src/packages/SPECS
 
- - picup xen-tools sources ,     rpmbuild -ba <spec> ,     rpm -i <rpm>
+ - picup xen-tools sources from this repro, use "master"  ,     rpmbuild -ba <spec> ,     rpm -i <rpm>
 
  
 The Scripts
