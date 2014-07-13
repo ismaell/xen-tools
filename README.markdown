@@ -103,10 +103,12 @@ Requirements
 
 To use these tools you'll need the following software on Dom0: <br>
 
-* [debootstrap](http://packages.debian.org/debootstrap)
-* [fakeroot](http://packages.debian.org/fakeroot)
-* [rpmstrap](https://github.com/blipvert/rpmstrap)
-* [rinse] http://collab-maint.alioth.debian.org/rinse)
+   Tool                 Source URL                        - what + distro 
+    
+* [debootstrap](http://packages.debian.org/debootstrap)   - bootstrap on debian/ubuntu 
+* [fakeroot](http://packages.debian.org/fakeroot)         - chroot helper 
+* [rpmstrap](https://github.com/blipvert/rpmstrap)        - rpmstrap for rpmbased 
+* [rinse] http://collab-maint.alioth.debian.org/rinse)    - bootstrap on RHEL / FC / SuSE / SLES 
 
 * Perl and the following Perl modules
   Requires: perl(Text::Template) <br>
@@ -143,12 +145,7 @@ expect can be autoremoved as well after with --finalrole=remove_expect for those
 
 * gnu make,and compiler ,  rpmbuild tools  if you are not installing through a package manager.
 
-
-You can try to install RPM-based distributions such as CentOS, or <br>
-Fedora Core, but you will need a correctly installed and configured <br>
-[rinse](http://packages.debian.org/rinse) package. <br>
-This is currently not fully supported on all distros with xen-tools.<br>
-rinse sample configs for centos6.5 added under examples -  this are fully tested .<br>
+* rinse sample configs for centos6.5 added under examples -  this are fully tested .<br>
 Rinse require fakeroot and rpmstrap to work cleanly. <br>
 
 If you wish to create new Xen instances which may be controlled by <br>
