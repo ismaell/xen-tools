@@ -145,7 +145,7 @@ expect can be autoremoved as well after with --finalrole=remove_rpm_expect for t
 
 * gnu make,and compiler ,  rpmbuild tools  if you are not installing through a package manager.
 
-* rinse sample configs for centos6.5 added under examples -  this are fully tested .<br>
+* [rinse] (http://collab-maint.alioth.debian.org/rinse)  sample configs for centos6.5 added under examples -  this are fully tested .<br>
 Rinse require fakeroot and rpmstrap to work cleanly. <br>
 
 If you wish to create new Xen instances which may be controlled by <br>
