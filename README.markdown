@@ -101,31 +101,47 @@ requirements.
 Requirements
 ------------
 
-To use these tools you'll need the following software:
+To use these tools you'll need the following software on Dom0:
 
 * [debootstrap](http://packages.debian.org/debootstrap)
 * [fakeroot](http://packages.debian.org/fakeroot)
 * [rpmstrap](https://github.com/blipvert/rpmstrap)
+* [rinse] http://collab-maint.alioth.debian.org/rinse)
 
 * Perl and the following Perl modules
-  * [Config::IniFiles](http://metacpan.org/release/Config-IniFiles)
-	([Debian Package libconfig-inifiles-perl](http://packages.debian.org/libconfig-inifiles-perl))
-  * [Text::Template](http://metacpan.org/release/Text-Template)
-	([Debian Package libtext-template-perl](http://packages.debian.org/libtext-template-perl))
-  * [Data::Validate::Domain](http://metacpan.org/release/Data-Validate-Domain)
-	([Debian Package libdata-validate-domain-perl](http://packages.debian.org/libdata-validate-domain-perl))
-  * [Data::Validate::IP](http://metacpan.org/release/Data-Validate-IP)
-	([Debian Package libdata-validate-ip-perl](http://packages.debian.org/libdata-validate-ip-perl))
-  * [Data::Validate::URI](http://metacpan.org/release/Data-Validate-URI)
-	([Debian Package libdata-validate-uri-perl](http://packages.debian.org/libdata-validate-uri-perl))
-  * [File::Slurp](http://metacpan.org/release/File-Slurp)
-	([Debian Package libfile-slurp-perl](http://packages.debian.org/libfile-slurp-perl))
-  * [File::Which](http://metacpan.org/release/File-Which)
-	([Debian Package libfile-which-perl](http://packages.debian.org/libfile-which-perl))
-  * and some more modules which are part of the Perl core and hence do not need to be installed separately.
+  Requires: perl(Text::Template)
+  Requires: perl(Config::IniFiles)
+  Requires: perl(Expect::Simple) perl(Expect)
+  Requires: perl(Getopt::Long)
+  Requires: perl(LWP::UserAgent)
+  Requires: perl(Pod::Usage)
+  Requires: perl(File::Basename)
+  Requires: perl(File::Find)
+  Requires: perl(File::Path)
+  Requires: perl(File::Temp)
+  Requires: perl(File::Which)
+  Requires: perl(File::Copy)
+  Requires: perl(Term::UI)
+  Requires: perl(Term::ReadLine)
+  Requires: perl(IPC::Cmd)
+  Requires: perl(Digest::MD5)
+  Requires: perl(Data::Validate::URI)
+  Requires: perl(Data::Validate::IP)
+  Requires: perl(Data::Validate::Domain)
+
+Most of them are delivered by distributions , thus this are only an question of allmost 
+to use the native distro package tools (apt-get / yum / zypper / yast / rpm / ... ) within hook
+If not found in distribution - use i.e http://www.rpmfind.net, http://www.debfind.de
+Or install them via  perl CPAN .
+ 
+* To use the --hash_method=expect you need expect installed on domU:
+  [expect] (http://expect.sourceforge.net/)
+  expect  require tcl to be installed.
+  
+  This been currently in use at ( oss13.1 : 29-setup-expect ) for autpdeploy inital random root pwd at opensuse 13.x  xen guest.
+  expect can be autoremoved as well after with --finalrole=remove_expect for those that have an security concern about it .
 
 * gnu make,and compiler ,  rpmbuild tools  if you are not installing through a package manager.
-
 
 
 You can try to install RPM-based distributions such as CentOS, or <br>
