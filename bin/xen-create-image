@@ -3680,14 +3680,17 @@ sub runCustomisationHooks
 
     foreach my $i (@$ips)
     {
-        $ENV{ 'ip' . $count } = $i;
+	my $ipn = 'ip' . $count;
+        $ENV{$ipn} = $i;
+
+	my $netinfo = getNetworkInfo($i, $CONFIG{'netmask'});
+	@ENV{map {$ipn . '_' . $_} keys %$netinfo} = values %$netinfo;
+
         $count += 1;
     }
 
     $ENV{ 'ip_count' } = ( $count - 1 );
 
-    my %netinfo = getNetworkInfo($ENV{'ip1'}, $CONFIG{'netmask'});
-    @ENV{keys %netinfo} = values %netinfo;
 
     #
     #  Now show the environment the children get

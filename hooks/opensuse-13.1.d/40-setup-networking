@@ -44,42 +44,27 @@ echo "alias eth1 xennet" >> ${prefix}/etc/modprobe.d/10-xen.conf
 
 echo "dhcp value" ${dhcp}
 
+
 #
 #  Test for static vs. DHCP
 #
+ipvar() {
+  echo '$ip'"$1$2"
+}
+
 if [ ! -z "${dhcp}" ]; then
-
-    #
-    #  Setup the initial interface
-    #
-    cat <<E_O_STATIC >${prefix}/etc/sysconfig/network/ifcfg-eth0
-STARTMODE='auto'
-NAME='eth0'
-ETHTOOL_OPTIONS=''
-BOOTPROTO='static'
-IPADDR=$ip1/$maskbits
-NETWORK=$network
-MTU=''
-BROADCAST=$broadcast
-REMOTE_IPADDR=''
-USERCONTROL='no'
-#
-E_O_STATIC
-
-     #
-     #  Now setup any other ones.
-     #
-     interface=1
-     count=2
+     interface=0
+     count=1
 
      while [ "${count}" -le "${ip_count}" ]; do
 
-         value=\$ip${count}
-         value=`eval echo $value`
+         eval    value=\"$(ipvar $count)\"
+         eval maskbits=\"$(ipvar $count _maskbits)\"
+         eval  network=\"$(ipvar $count _network)\"
 
          logMessage Adding eth${interface}
 
-         cat <<E_O_STATIC >${prefix}/etc/sysconfig/network/ifcfg-eth${interface}
+         cat <<E_O_STATIC >${prefix}/etc/sysconfig/network/ifcfg-eth"$interface"
 STARTMODE='auto'
 NAME=eth$interface
 ONBOOT=yes
