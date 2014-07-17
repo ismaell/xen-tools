@@ -131,6 +131,7 @@ echo "$ip1" "$hostname" >>"$prefix"/etc/hosts
 #
 #--------------------------------------------
 ntpserver="$nameserver"
+dnssearch='softwareenergie.eu softwareenergie.de softwareenergie.at ads.softwareenergie.eu remsnet.net'
 
 # parse config file
 conf="$prefix"/etc/sysconfig/network/config
@@ -143,7 +144,7 @@ sed '
 		s/=.*/="'"$ntpserver"'"/
 	}
 	/^NETCONFIG_DNS_STATIC_SEARCHLIST=/ {
-		s/=.*/="softwareenergie.eu softwareenergie.de softwareenergie.at ads.softwareenergie.eu remsnet.net"/
+		s/=.*/="'"$dnssearch"'"/
 	}
 	/^NOZEROCONF=/ {
 		s/=.*/="yes"/
