@@ -307,6 +307,13 @@ and EVMS EXAMPLE.
                 Optionally, set a specific vif name for the new
                 instance.
 
+   --dnssearch=domains
+                Setup the search list for hostname lookup.
+
+   --ntpserver=address
+                Setup a time server for the machine, multiple space-separated
+                servers are allowed.
+
 
 
   Mandatory options:
@@ -1470,6 +1477,8 @@ sub setupDefaultOptions
     #  Network options.
     #
     $CONFIG{ 'nameserver' } = '';
+    $CONFIG{ 'dnssearch' }  = 'localdomain';
+    $CONFIG{ 'ntpserver' }  = '1.pool.ntp.org 2.pool.ntp.org';
 
 }
 
@@ -1707,6 +1716,8 @@ sub parseCommandLineArguments
             "nameserver=s", \&checkOption,
             "vifname=s",    \&checkOption,
             "p2p=s",        \&checkOption,
+            "dnssearch=s",  \$CONFIG{ 'dnssearch' },
+            "ntpserver=s",  \$CONFIG{ 'ntpserver' },
 
             # Exclusive
             #
