@@ -57,11 +57,10 @@ STARTMODE='auto'
 NAME=eth0'
 ETHTOOL_OPTIONS=''
 BOOTPROTO='static'
-IPADDR=${ip1}
+IPADDR=$ip1/$maskbits
+NETWORK=$network
 MTU=''
-NETMASK=${netmask}
-GATEWAY=${gateway}
-BROADCAST${broadcast}
+BROADCAST=$broadcast
 REMOTE_IPADDR=''
 USERCONTROL='no'
 #
