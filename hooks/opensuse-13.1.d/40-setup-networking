@@ -113,11 +113,6 @@ echo "default" ${gateway} "- -"  >${prefix}/etc/sysconfig/network/routes
 # add hostname to /etc/hosts
 echo "$ip1" "$hostname" >>"$prefix"/etc/hosts
 
-#
-#--------------------------------------------
-ntpserver="$nameserver"
-dnssearch='softwareenergie.eu softwareenergie.de softwareenergie.at ads.softwareenergie.eu remsnet.net'
-
 # parse config file
 conf="$prefix"/etc/sysconfig/network/config
 cp "$conf" "$conf"-orig
