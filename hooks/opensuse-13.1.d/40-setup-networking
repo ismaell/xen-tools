@@ -124,6 +124,32 @@ fi
 # SuSE stype : setup the default route.
 echo "default" ${gateway} "- -"  >${prefix}/etc/sysconfig/network/routes
 
+
+# add hostname to /etc/hosts
+echo "$ip1" "$hostname" >>"$prefix"/etc/hosts
+
+#
+#--------------------------------------------
+ntpserver="$nameserver"
+
+# parse config file
+conf="$prefix"/etc/sysconfig/network/config
+cp "$conf" "$conf"-orig
+sed '
+	/^NETCONFIG_DNS_STATIC_SERVERS=/ {
+		s/=.*/="'"$nameserver"'"/
+	}
+	/^NETCONFIG_NTP_STATIC_SERVERS=/ {
+		s/=.*/="'"$ntpserver"'"/
+	}
+	/^NETCONFIG_DNS_STATIC_SEARCHLIST=/ {
+		s/=.*/="softwareenergie.eu softwareenergie.de softwareenergie.at ads.softwareenergie.eu remsnet.net"/
+	}
+	/^NOZEROCONF=/ {
+		s/=.*/="yes"/
+	}
+' "$conf"-orig > "$conf"
+
 #
 #  Log our finish
 #
